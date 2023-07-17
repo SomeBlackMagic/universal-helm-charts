@@ -1,0 +1,57 @@
+image:
+  registry: registry.local
+  repository: project
+  tag: master
+  digest: sha256@11111
+  id: sha256@2222
+  pullPolicy: Always
+  pullSecrets: []
+
+
+initApplication:
+  - name: initApplicationItem
+    command: "bash"
+    args: "ls -lah"
+    resources:
+      requests:
+        cpu: "30m"
+        memory: 50Mi
+      limits:
+        cpu: "100m"
+        memory: 100Mi
+
+
+logsTail:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: someblackmagic/logs-tail
+    tag: 0.1.0
+  logsFolder: /tmp/logsTail
+  logsOwnerUser: 2000
+  logsOwnerGroup: 2000
+
+
+sharedCache:
+  enabled: true
+  folder: /tmp/sharedCache
+  cacheOwnerUser: 3000
+  cacheOwnerGroup: 3000
+
+sharedMedia:
+  enabled: true
+  folder: /tmp/sharedMedia
+  persistence:
+    enabled: true
+    size: 1Gi
+    accessMode: ReadWriteMany
+    storageClassName: ~
+
+podSecurityContext:
+  enabled: true
+
+containerSecurityContext:
+  enabled: true
+
+autoscaling:
+  enabled: true

@@ -1,0 +1,209 @@
+metadata:
+  deployedBy: null-value
+  pipelineUrl: null-value
+
+image:
+  registry: ~
+  repository: ~
+  tag: master
+  digest: ~
+  id: ~
+  pullPolicy: Always
+  pullSecrets: []
+
+
+## Enable diagnostic mode in the deployment
+##
+diagnosticMode:
+  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  ##
+  enabled: false
+  ## @param diagnosticMode.command Command to override all containers in the deployment
+  ##
+  command:
+    - sleep
+  ## @param diagnosticMode.args Args to override all containers in the deployment
+  ##
+  args:
+    - infinity
+
+## @param initApplication
+## For example:
+##  - name: create-cache
+##    command: "bash"
+##    args: "ls -lah"
+##    resources:
+##      requests:
+##        cpu: "30m"
+##        memory: 50Mi
+##      limits:
+##        cpu: "100m"
+##        memory: 100Mi
+initApplication: []
+
+
+## @param extraEnvVarsSecret Name of existing Secret containing extra env vars for app nodes
+## For example:
+##  - name: secret-name
+##    checksum: sha256sum-value
+##
+extraEnvVarsSecrets: []
+
+initContainers: []
+
+extraEnvVars:
+  COLUMNS: 800
+
+
+logsTail:
+  enabled: false
+  image:
+    registry: docker.io
+    repository: someblackmagic/logs-tail
+    tag: 0.1.0
+  logsFolder: ~
+  logsOwnerUser: 1000
+  logsOwnerGroup: 1000
+
+sharedCache:
+  enabled: false
+  folder: ~
+  cacheOwnerGroup: 1000
+  cacheOwnerUser: 1000
+
+sharedMedia:
+  enabled: false
+  folder: ~
+  persistence:
+    enabled: false
+    size: 1Gi
+    accessMode: ReadWriteMany
+    storageClassName: ~
+
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 20%
+    maxSurge: 1
+
+replicaCount: 1
+
+resources:
+  enabled: true
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  requests: {}
+  # requests:
+  #   cpu: 50m
+  #   memory: 120Mi
+
+  limits: {}
+  # limits:
+  #   cpu: 300m
+  #   memory: 400Mi
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+  failureThreshold: 10
+  successThreshold: 1
+
+podSecurityContext:
+  enabled: false
+  runAsNonRoot: false
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+containerSecurityContext:
+  active: false  # set in cli args
+  enabled: false  # set in yaml values
+  runAsUser: 1000
+  runAsNonRoot: true
+
+metrics:
+  enabled: false
+  image:
+    registry: docker.io
+    repository: hipages/php-fpm_exporter
+    tag: 2.0.4
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 15m
+      memory: 20Mi
+
+  serviceMonitor:
+    enabled: true
+    # serviceMonitor.labels -- labels to set on the vault serviceMonitor
+    labels: {}
+    # scrapeTimeout  -- scrapeTimeout of the serviceMonitor
+    scrapeTimeout: 30s
+
+    scrapeInterval: 30s
+
+    # -- Specify the Kubernetes namespace where Prometheus expects to find
+    # service monitors configured.
+    # namespace: ""
+
+# Mutually exclusive with autoscaling
+autoscaling:
+  active: false  # set in yaml values
+  enabled: false  # set in cli args
+  minReplicas: 1
+  maxReplicas: 10
+  # targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+  behavior: {}
+    # scaleDown:
+    #   stabilizationWindowSeconds: 300
+    #   policies:
+    #   - type: Pods
+    #     value: 1
+    #     periodSeconds: 180
+    # scaleUp:
+    #   stabilizationWindowSeconds: 300
+    #   policies:
+    #   - type: Pods
+    #     value: 2
+    #     periodSeconds: 60
+
+autoscalingTemplate: []
+# Custom or additional autoscaling metrics
+# ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#support-for-custom-metrics
+# - type: Pods
+#   pods:
+#     metric:
+#       name: app_process_requests_total
+#     target:
+#       type: AverageValue
+#       averageValue: 10000m
+
+## @param podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+##
+podLabels: {}
+## @param podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
+podAnnotations: {}
+
+## @param sidecars Add additional sidecar containers for the pod(s)
+##
+sidecars: []
+
+extraVolumeMounts: []
+
+extraVolumes: []

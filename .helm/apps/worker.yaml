@@ -1,0 +1,31 @@
+command: "php"
+arguments: "/app/bin/worker"
+
+
+image:
+  registry: docker.io
+  repository: someblackmagic/universal-helm-charts
+  tag: php8.2-app-latest
+  id: php8.2-app-latest
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 1
+  periodSeconds: 1
+  timeoutSeconds: 1
+  failureThreshold: 50
+  successThreshold: 1
+  exec:
+    command:
+      - cat
+      - /var/lock/ready.lock
+
+
+secretReloader:
+  enabled: true
+  auto: true
+
+externalSecret:
+  enabled: true
+  secretStoreRef:
+    name: vault-backend-global

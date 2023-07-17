@@ -1,0 +1,55 @@
+{{- if and $.Values.metrics.enabled $.Values.metrics.podMonitor.enabled ( $.Capabilities.APIVersions.Has "monitoring.coreos.com/v1" ) }}
+  {{- if eq $.Values.metrics.podMonitor.basicAuth.enabled true }}
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ $.Release.Name }}-pod-monitor-auth-secret
+stringData:
+  username: "admin"
+  password: "admin"
+---
+  {{- end }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ $.Release.Name }}-pod-monitor
+  namespace: {{ $.Values.metrics.podMonitor.namespace | default $.Release.Namespace }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if $.Values.metrics.podMonitor.labels }}
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.metrics.podMonitor.labels "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if $.Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- if $.Values.metrics.podMonitor.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.metrics.podMonitor.annotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if $.Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/chart-name: {{ $.Chart.Name }}
+      app.kubernetes.io/release-name: {{ $.Release.Name }}
+  namespaceSelector:
+    matchNames:
+      - {{ $.Release.Namespace }}
+  podMetricsEndpoints:
+    - port: monitoring
+      scrapeTimeout: {{ $.Values.metrics.podMonitor.scrapeTimeout }}
+      interval: {{ $.Values.metrics.podMonitor.scrapeInterval }}
+      {{- if $.Values.metrics.podMonitor.basicAuth.enabled }}
+      basicAuth:
+        password:
+          name: {{ $.Release.Name }}-pod-monitor-auth-secret
+          key: password
+        username:
+          name: {{ $.Release.Name }}-pod-monitor-auth-secret
+          key: username
+      {{- end }}
+      relabelings: {{- include "common.tplvalues.render" (dict "value" $.Values.metrics.podMonitor.relabelings "context" $) | nindent 8 }}
+
+{{- end }}

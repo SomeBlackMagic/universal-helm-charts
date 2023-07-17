@@ -1,0 +1,15 @@
+name: Unit tests
+
+#on: pull_request
+on: push
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: d3adb5/helm-unittest-action@v2
+        with:
+          charts: ".helm/charts/app-cronjob/ .helm/charts/app-job/ .helm/charts/app-nginx/ .helm/charts/app-nodejs/ .helm/charts/app-php-fpm/ .helm/charts/app-shared-resources/ .helm/charts/app-worker/"
+          helm-version: v3.8.0
+          github-token: ${{ secrets.GITHUB_TOKEN }}

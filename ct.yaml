@@ -1,0 +1,10 @@
+# See https://github.com/helm/chart-testing#configuration
+remote: origin
+target-branch: master
+chart-dirs:
+  - .helm/charts
+chart-repos:
+  - bitnami=https://charts.bitnami.com/bitnami
+  - someblackmagic-common=https://someblackmagic.github.io/helm-charts
+#helm-extra-args: --timeout 600s
+validate-maintainers: false

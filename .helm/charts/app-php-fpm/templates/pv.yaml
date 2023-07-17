@@ -1,0 +1,19 @@
+{{- if and $.Values.sharedMedia.enabled $.Values.sharedMedia.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $.Release.Name }}-shared-storage
+  labels:
+    app.kubernetes.io/name: {{ $.Chart.Name }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+spec:
+  accessModes:
+    - {{ $.Values.sharedMedia.persistence.accessMode | quote }}
+  storageClassName: {{ $.Values.sharedMedia.persistence.storageClassName | quote }}
+  resources:
+    requests:
+      storage: {{ $.Values.sharedMedia.persistence.size | quote }}
+
+{{- end }}

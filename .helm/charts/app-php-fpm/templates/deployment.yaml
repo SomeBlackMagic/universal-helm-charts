@@ -1,0 +1,269 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ $.Chart.Name }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+  annotations:
+    metadata/deployed-by: {{ $.Values.metadata.deployedBy | quote }}
+    metadata/pipeline-url: {{ $.Values.metadata.pipelineUrl | quote }}
+spec:
+  replicas: {{ $.Values.replicaCount }}
+  strategy: {{- toYaml $.Values.updateStrategy | nindent 4 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/chart-name: {{ $.Chart.Name }}
+      app.kubernetes.io/release-name: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ $.Release.Name }} # duplicate release name only for work helm-assistant
+        app.kubernetes.io/chart-name: {{ $.Chart.Name }}
+        app.kubernetes.io/release-name: {{ $.Release.Name }}
+        app.metadata.io/version: {{ $.Chart.AppVersion | default "nill" | trunc 63 }}
+        {{- if $.Values.podLabels }}
+        {{- include "common.tplvalues.render" (dict "value" $.Values.podLabels "context" $) | nindent 8 }}
+        {{- end }}
+      annotations:
+        imageId: {{ $.Values.image.id | quote }}
+        {{- range $item := $.Values.extraEnvVarsSecrets }}
+        checksum/externalSecret_{{ $item.name }}: {{ $item.checksum | quote  }}
+        {{- end }}
+        {{- if $.Values.podAnnotations }}
+        {{- include "common.tplvalues.render" (dict "value" $.Values.podAnnotations "context" $) | nindent 8 }}
+        {{- end }}
+    spec:
+      automountServiceAccountToken: false
+      {{- if $.Values.image.pullSecrets }}
+      imagePullSecrets: {{ toYaml $.Values.image.pullSecrets | nindent 10 }}
+      {{- end }}
+      {{- if $.Values.podSecurityContext.enabled }}
+      securityContext: {{- omit $.Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: 30
+      shareProcessNamespace: true
+      volumes:
+        {{- if $.Values.logsTail.enabled }}
+        - name: logs-folder
+          emptyDir: {}
+        {{- end }}
+        {{- if $.Values.sharedCache.enabled }}
+        - name: cache-folder
+          emptyDir: {}
+        {{- end }}
+        {{- if $.Values.sharedMedia.enabled }}
+        - name: shared-media-data
+          {{- if .Values.sharedMedia.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ $.Release.Name }}-shared-storage
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- end }}
+        {{- if $.Values.extraVolumes }}
+        {{- include "common.tplvalues.render" ( dict "value" $.Values.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+
+      initContainers:
+        {{- if $.Values.logsTail.enabled }}
+        - name: logs-folder-ownership
+          image: alpine:3
+          command:
+            - chown
+            - -Rv
+            - {{ $.Values.logsTail.logsOwnerUser }}:{{ $.Values.logsTail.logsOwnerGroup }}
+            - {{ $.Values.logsTail.logsFolder }}
+          volumeMounts:
+            - name: logs-folder
+              mountPath: {{ $.Values.logsTail.logsFolder }}
+        {{- end }}
+        {{- if $.Values.sharedCache.enabled }}
+        - name: cache-folder-ownership
+          image: alpine:3
+          command:
+            - chown
+            - -Rv
+            - {{ $.Values.sharedCache.cacheOwnerUser }}:{{ $.Values.sharedCache.cacheOwnerGroup }}
+            - {{ $.Values.sharedCache.folder }}
+          volumeMounts:
+            - name: cache-folder
+              mountPath: {{ $.Values.sharedCache.folder }}
+        {{- end }}
+        {{- if $.Values.initContainers }}
+        {{- include "common.tplvalues.render" ( dict "value" $.Values.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+        {{- range $job := $.Values.initApplication }}
+        - name: {{ $job.name }}
+          image: "{{ $.Values.image.registry }}/{{ $.Values.image.repository }}:{{ $.Values.image.tag }}{{- if ($.Values.image.digest) -}} @{{$.Values.image.digest}} {{- end -}}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+
+          command: {{- include "common.cmd" (dict "value" $job.command "context" $) | nindent 12 }}
+          args:{{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 12 }}
+
+          envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}
+          env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 12 }}
+
+          {{- if $job.resources }}
+          resources: {{ toYaml $job.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- if $.Values.sharedCache.enabled }}
+            - name: cache-folder
+              mountPath: {{ $.Values.sharedCache.folder }}
+            {{- end }}
+        {{- end }}
+        {{- if $.Values.initContainers }}
+        {{- include "common.tplvalues.render" ( dict "value" $.Values.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: php-fpm
+          image: "{{ $.Values.image.registry }}/{{ $.Values.image.repository }}:{{ $.Values.image.tag }}{{- if ($.Values.image.digest) -}} @{{$.Values.image.digest}} {{- end -}}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+
+          {{- if $.Values.diagnosticMode.enabled }}
+          command: {{- include "common.cmd" (dict "value" $.Values.diagnosticMode.command "context" $) | nindent 12 }}
+          args: {{- include "common.cmd" (dict "value" $.Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- end }}
+
+          envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}
+          env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 12 }}
+
+          {{- if $.Values.resources.enabled }}
+          resources: {{- omit $.Values.resources "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+
+          {{- if and (eq $.Values.containerSecurityContext.enabled true) (eq $.Values.containerSecurityContext.active true) }}
+          securityContext: {{- omit $.Values.containerSecurityContext "enabled" "active" | toYaml | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- if $.Values.logsTail.enabled }}
+            - name: logs-folder
+              mountPath: {{ $.Values.logsTail.logsFolder }}
+            {{- end }}
+
+            {{- if $.Values.sharedCache.enabled }}
+            - name: cache-folder
+              mountPath: {{ $.Values.sharedCache.folder }}
+            {{- end }}
+
+            {{- if $.Values.sharedMedia.enabled }}
+            - name: cache-folder
+              mountPath: {{ $.Values.sharedMedia.folder }}
+            {{- end }}
+
+            {{- if $.Values.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" $.Values.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
+
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+          {{- if $.Values.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command:
+                - php-fpm-healthcheck # a simple ping since this means it's ready to handle traffic
+            initialDelaySeconds: {{ $.Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ $.Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ $.Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ $.Values.readinessProbe.successThreshold }}
+          {{- end }}
+
+          {{- if $.Values.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command:
+                - php-fpm-healthcheck
+                - --listen-queue=30 # fails if there are more than 10 processes waiting in the fpm queue
+            initialDelaySeconds: {{ $.Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ $.Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ $.Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ $.Values.livenessProbe.successThreshold }}
+          {{- end }}
+
+          {{- if $.Values.resources.enabled }}
+          resources: {{- omit $.Values.resources "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - echo "Stopping container by k8s...">/proc/1/fd/1 && /bin/kill -QUIT 1
+
+        {{- if $.Values.metrics.enabled }}
+        - name: monitoring
+          image: "{{ $.Values.metrics.image.registry }}/{{ $.Values.metrics.image.repository }}:{{ $.Values.metrics.image.tag }}"
+          imagePullPolicy: {{ $.Values.metrics.image.pullPolicy }}
+          env:
+            - name: PHP_FPM_SCRAPE_URI
+              value: tcp://127.0.0.1:9000/status
+            - name: PHP_FPM_FIX_PROCESS_COUNT
+              value: 'true'
+          resources: {{ toYaml $.Values.metrics.resources | nindent 12 }}
+          ports:
+          - containerPort: 9253
+            name: monitoring
+            protocol: TCP
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - echo "Stopping container by k8s...">/proc/1/fd/1 && /bin/kill -SIGTERM 1
+        {{- end }}
+
+        {{- if $.Values.logsTail.enabled }}
+        - name: logs
+          image: "{{ $.Values.logsTail.image.registry }}/{{ $.Values.logsTail.image.repository }}:{{ $.Values.logsTail.image.tag }}"
+          volumeMounts:
+          - name: logs-folder
+            mountPath: {{ $.Values.logsTail.logsFolder }}
+          command:
+          - /bin/sh
+          args:
+            - -ec
+            - |
+              logDir={{ $.Values.logsTail.logsFolder }}
+              mkdir -p ${logDir}
+              chown 1000:1000 ${logDir}
+              while true; do
+                ( find "$logDir" -type f -print0 | xargs -0 tail -v -f -n 0 )&
+                tailPid=$!
+                inotifywait --recursive --quiet --event create --format=%w%f "$logDir" | tr \\n \\0 | xargs -0 tail -v
+                kill $tailPid || true
+              done
+
+          resources:
+            requests:
+              cpu: 15m
+              memory: 20Mi
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - echo "Stopping container by k8s...">/proc/1/fd/1 && /bin/kill -SIGTERM 1
+        {{- end }}
+
+        {{- if $.Values.sidecars }}
+        {{- include "common.tplvalues.render" (dict "value" $.Values.sidecars "context" $) | nindent 10 }}
+        {{- end }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/chart-name: {{ $.Chart.Name }}
+                    app.kubernetes.io/release-name: {{ $.Release.Name }}
+                topologyKey: kubernetes.io/hostname

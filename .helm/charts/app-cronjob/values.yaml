@@ -1,0 +1,118 @@
+metadata:
+  deployedBy: null-value
+  pipelineUrl: null-value
+
+image:
+  registry: ~
+  repository: ~
+  tag: master
+  pullPolicy: Always
+  pullSecrets: []
+  id: ~
+
+## Enable diagnostic mode in the deployment
+##
+diagnosticMode:
+  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  ##
+  enabled: false
+  ## @param diagnosticMode.command Command to override all containers in the deployment
+  ##
+  command:
+    - sleep
+  ## @param diagnosticMode.args Args to override all containers in the deployment
+  ##
+  args:
+    - infinity
+
+
+extraEnvVarsSecrets: []
+
+initContainers: []
+
+initApplication: []
+#  - name: initApplicationItem
+#    command: "bash"
+#    args: "ls -lah"
+#    resources:
+#      requests:
+#        cpu: "30m"
+#        memory: 50Mi
+#      limits:
+#        cpu: "100m"
+#        memory: 100Mi
+
+extraEnvVars: {}
+
+cron:
+  schedule: ~
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 3
+  # It specifies how to treat concurrent executions of a job that is created by this CronJob. The spec may specify only one of the following concurrency policies:
+  # Allow (default): The CronJob allows concurrently running jobs
+  # Forbid: The CronJob does not allow concurrent runs; if it is time for a new job run and the previous job run hasn't finished yet, the CronJob skips the new job run
+  # Replace: If it is time for a new job run and the previous job run hasn't finished yet, the CronJob replaces the currently running job run with a new job run
+  concurrencyPolicy: Forbid
+#  startingDeadlineSeconds: 180
+
+job:
+  id: null
+  idAutoGenerate: false
+  name: ''
+  command: ''
+  arguments: ''
+  backoffLimit: 6
+  parallelism: 1
+  ttlSecondsAfterFinished: 7200
+  activeDeadlineSeconds: 100
+  completions: 1
+  suspend: false
+
+
+resources:
+  enabled: false
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  requests: {}
+  #    requests:
+  #        cpu: 300m
+  #        memory: 300Mi
+  limits: {}
+  #    limits:
+  #        cpu: 200m
+  #        memory: 1000Mi
+
+podSecurityContext:
+  enabled: false
+  runAsNonRoot: false
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+containerSecurityContext:
+  enabled: false
+  runAsUser: 1000
+  runAsNonRoot: true
+  readOnlyRootFilesystem: false
+
+terminationGracePeriodSeconds: 30
+restartPolicy: OnFailure
+
+## @param podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+##
+podLabels: {}
+## @param podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
+podAnnotations: {}
+
+lifecycle:
+  preStop:
+    - /bin/sh
+    - -c
+    - echo "Stopping container by k8s...">/proc/1/fd/1 && /bin/kill -QUIT 1
+
+sidecars: []

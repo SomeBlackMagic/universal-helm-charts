@@ -1,0 +1,7 @@
+replicaCount: 3
+
+image:
+  registry: docker.io
+  repository: someblackmagic/universal-helm-charts
+  tag: php8.2-app-latest
+  id: php8.2-app-latest

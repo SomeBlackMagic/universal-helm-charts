@@ -1,0 +1,51 @@
+{{- if $.Values.extraVhostConfig.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Release.Name }}-extra-vhost-config
+data:
+  extraVHostConfig.conf: |-
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.extraVhostConfig.content "context" $ ) | nindent 4 }}
+---
+{{- end }}
+
+{{- if $.Values.extraConfig.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Release.Name }}-extra-config
+data:
+  extraConfig.conf: |-
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.extraConfig.content "context" $ ) | nindent 4 }}
+---
+{{- end }}
+
+{{- if $.Values.externalUpstream.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Release.Name }}-external-upstream
+data:
+  fpm-upstream.conf: |-
+    upstream upstream-app {
+        server {{ $.Values.externalUpstream.serviceName }}:{{ $.Values.externalUpstream.servicePort }} max_fails={{ $.Values.externalUpstream.maxFails }} fail_timeout={{ $.Values.externalUpstream.failTimeout }};
+    }
+
+---
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Release.Name }}-monitoring-conf
+data:
+  monitoring.conf: |-
+    server {
+      listen 8888 default_server;
+      server_name _;
+
+      access_log off;
+
+      location /stub_status {
+      stub_status;
+      }
+    }

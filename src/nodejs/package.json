@@ -1,0 +1,17 @@
+{
+  "name": "nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@echo-health/koa-prometheus-exporter": "^1.0.4",
+    "koa": "^2.14.2",
+    "koa-req-logger": "^1.5.3",
+    "prom-client": "^14.2.0"
+  }
+}

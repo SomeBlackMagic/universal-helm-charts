@@ -1,0 +1,27 @@
+command: "kubectl"
+# arguments: "get pods"
+arguments:
+  - get
+  - pods
+
+image:
+  digest: digest
+  id: id
+
+extraEnvVarsSecrets:
+  - name: foo
+    checksum: sha256sum-value
+
+## @param customLivenessProbe Custom livenessProbe that overrides the default one
+##
+customLivenessProbe:
+  enabled: false
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 10
+  successThreshold: 10
+  exec:
+    command:
+      - ls
+      - lah

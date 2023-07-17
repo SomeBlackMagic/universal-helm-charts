@@ -1,0 +1,11 @@
+replicaCount: 3
+
+image:
+  registry: docker.io
+  repository: someblackmagic/universal-helm-charts
+  tag: nginx-app-latest
+  id: nginx-app-latest
+
+externalUpstream:
+  enabled: true
+  serviceName: php-fpm

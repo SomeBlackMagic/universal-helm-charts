@@ -1,0 +1,43 @@
+#!/usr/bin/env php
+<?php
+
+// tick use required
+declare(ticks=1);
+
+echo "Installing signal handler...\n";
+
+// setup signal handlers
+pcntl_signal(SIGTERM, "sig_handler");
+pcntl_signal(SIGHUP, "sig_handler");
+pcntl_signal(SIGUSR1, "sig_handler");
+pcntl_signal(SIGINT, "sig_handler");
+global $isShutdown;
+$work = true;
+$isShutdown = false;
+$i = 0;
+$j = 0;
+while ($work) {
+    echo "I:" . $i . "\n";
+    if ($i > 10 && !file_exists('/var/lock/ready.lock')) {
+        touch('/var/lock/ready.lock');
+        echo "Add ready.lock \n";
+    }
+    $i++;
+    sleep(1);
+    if($isShutdown === true) {
+        $j++;
+    }
+    if ($j > 3) {
+        echo "Bye:) \n";
+        break;
+    }
+}
+
+
+function sig_handler($signal)
+{
+    global $isShutdown;
+    echo "\nCatch signal: $signal. Start gracefully shutdown. \n";
+    $isShutdown = true;
+
+}
