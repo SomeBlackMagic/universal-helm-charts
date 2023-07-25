@@ -1,3 +1,6 @@
 *.swp
 *.bak
 *.tmp
+validate.sh
+unit-tests.sh
+tests

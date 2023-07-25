@@ -1,0 +1,106 @@
+suite: base cronjob test
+templates:
+  - templates/cronjob.yaml
+release:
+  name: my-cronjob
+  namespace: my-namespace
+  revision: 1
+  upgrade: true
+capabilities:
+  majorVersion: 1
+  minorVersion: 10
+  apiVersions:
+    - br.dev.local/v2
+chart:
+  version: 1.0.0
+  appVersion: 1.0.0
+tests:
+  - it: test container
+    set:
+      image.registry: docker.io
+      image.repository: path/to/docker/image
+      image.tag: v1.0.0
+      image.pullPolicy: IfNotPresent
+      image.pullSecrets:
+        - name: docker-registry-auth-secret
+      image.id: ~
+    asserts:
+      - isSubset:
+          path: spec.jobTemplate.spec.template.spec
+          any: true
+          content:
+            imagePullSecrets:
+              - name: docker-registry-auth-secret
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].image
+          value: "docker.io/path/to/docker/image:v1.0.0"
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].imagePullPolicy
+          value: "IfNotPresent"
+  - it: test diagnosticMode
+    set:
+      diagnosticMode.enabled: true
+    asserts:
+      - isSubset:
+          path: spec.jobTemplate.spec.template.spec.containers[0]
+          content:
+            args:
+              - infinity
+            command:
+              - sleep
+  - it: test pipeline metadata
+    set:
+      metadata.deployedBy: 'username'
+      metadata.pipelineUrl: 'https://some-url.local/jobs/123456789'
+    asserts:
+      - equal:
+          path: metadata.annotations["metadata/deployed-by"]
+          value: username
+      - equal:
+          path: metadata.annotations["metadata/pipeline-url"]
+          value: "https://some-url.local/jobs/123456789"
+
+  - it: test extraEnvVarsSecrets
+    set:
+      extraEnvVarsSecrets:
+        - name: 'extraEnvVarsSecrets-name'
+          checksum: 'extraEnvVarsSecrets-checksum'
+      initApplication:
+        - name: 'initApplication-example'
+          command: 'ls'
+          args: '-la'
+
+    asserts:
+      - isSubset:
+          path: spec.jobTemplate.spec.template.spec.initContainers[0]
+          content:
+            envFrom:
+              - secretRef:
+                  name: extraEnvVarsSecrets-name
+      - isSubset:
+          path: spec.jobTemplate.spec.template.spec.containers[0]
+          content:
+            envFrom:
+              - secretRef:
+                  name: extraEnvVarsSecrets-name
+
+
+
+
+#  - it: test initContainers
+#    set:
+##      initContainers[0].name: 'fooBarBaz'
+##      initContainers[0].image: 'docker.io/test-image:latest'
+##      initContainers[0].command: "ls"
+##      initContainers[0].args: 'ls'
+#
+#
+##      initApplication[0].name: foo
+##      initApplication[0].command: 'ls'
+##      initApplication[0].args: 'ls'
+#    asserts:
+#      - contains:
+#          path: spec.jobTemplate.spec.template.spec.initContainers[0]
+#          content:
+#            name: 'foo'
+

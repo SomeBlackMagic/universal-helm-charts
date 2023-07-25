@@ -66,14 +66,14 @@ spec:
               image: "{{ $.Values.image.registry }}/{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
               imagePullPolicy: {{ $.Values.image.pullPolicy }}
 
-              command: {{- include "common.cmd" (dict "value" $job.command "context" $) | nindent 14 }}
-              args:{{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 14 }}
+              command: {{- include "common.cmd" (dict "value" $job.command "context" $) | nindent 16 }}
+              args:{{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 16 }}
 
-              envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 14 }}
-              env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 14 }}
+              envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 16 }}
+              env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 16 }}
 
               {{- if $job.resources }}
-              resources: {{ toYaml $job.resources | nindent 14 }}
+              resources: {{ toYaml $job.resources | nindent 16 }}
               {{- end }}
             {{- end }}
             {{- if $.Values.initContainers }}
@@ -86,25 +86,25 @@ spec:
               
 
               {{- if $.Values.diagnosticMode.enabled }}
-              command: {{- include "common.cmd" (dict "value" $.Values.diagnosticMode.command "context" $) | nindent 14 }}
-              {{- else if $.Values.command }}
-              command: {{- include "common.cmd" (dict "value" $.Values.job.command "context" $) | nindent 14 }}
+              command: {{- include "common.cmd" (dict "value" $.Values.diagnosticMode.command "context" $) | nindent 16 }}
+              {{- else if $.Values.job.command }}
+              command: {{- include "common.cmd" (dict "value" $.Values.job.command "context" $) | nindent 16 }}
               {{- end }}
 
               {{- if $.Values.diagnosticMode.enabled }}
-              args: {{- include "common.cmd" (dict "value" $.Values.diagnosticMode.args "context" $) | nindent 14 }}
-              {{- else if $.Values.arguments }}
-              args: {{- include "common.cmd" (dict "value" $.Values.job.arguments "context" $) | nindent 14 }}
+              args: {{- include "common.cmd" (dict "value" $.Values.diagnosticMode.args "context" $) | nindent 16 }}
+              {{- else if $.Values.job.arguments }}
+              args: {{- include "common.cmd" (dict "value" $.Values.job.arguments "context" $) | nindent 16 }}
               {{- end }}
 
-              envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 14 }}
-              env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 14 }}
+              envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 16 }}
+              env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 16 }}
 
               {{- if $.Values.resources.enabled }}
               resources: {{- omit $.Values.resources "enabled" | toYaml | nindent 14 }}
               {{- end }}
               {{- if $.Values.containerSecurityContext.enabled }}
-              securityContext: {{- omit $.Values.containerSecurityContext "enabled" | toYaml | nindent 14 }}
+              securityContext: {{- omit $.Values.containerSecurityContext "enabled" | toYaml | nindent 16 }}
               {{- end }}
               lifecycle:
                 preStop:
