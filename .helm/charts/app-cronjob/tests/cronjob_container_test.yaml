@@ -14,16 +14,14 @@ capabilities:
 chart:
   version: 1.0.0
   appVersion: 1.0.0
+values:
+  - 'baseValues/base-container.yaml'
+
 tests:
   - it: test container
     set:
-      image.registry: docker.io
-      image.repository: path/to/docker/image
-      image.tag: v1.0.0
-      image.pullPolicy: IfNotPresent
       image.pullSecrets:
         - name: docker-registry-auth-secret
-      image.id: ~
     asserts:
       - isSubset:
           path: spec.jobTemplate.spec.template.spec
@@ -83,24 +81,157 @@ tests:
             envFrom:
               - secretRef:
                   name: extraEnvVarsSecrets-name
+      - equal:
+          path: spec.jobTemplate.spec.template.metadata.annotations["checksum/externalSecret_extraEnvVarsSecrets-name"]
+          value: "extraEnvVarsSecrets-checksum"
 
 
+  - it: test initContainers
+    set:
+      initContainers:
+        - name: 'fooBarBaz'
+          image: 'docker.io/test-image:latest'
+          command: 'ls'
+          args: '-lah'
+    asserts:
+      - isSubset:
+          path: spec.jobTemplate.spec.template.spec.initContainers[0]
+          content:
+            name: 'fooBarBaz'
+            image: 'docker.io/test-image:latest'
+            command: 'ls'
+            args: '-lah'
 
+  - it: test initApplication
+    set:
+      image:
+        registry: docker.io
+        repository: path/to/docker/image
+        tag: v1.0.0
+        pullPolicy: IfNotPresent
+      initApplication:
+        - name: initApplicationItem
+          command: "bash"
+          args: "ls -lah"
+          resources:
+            requests:
+              cpu: "30m"
+              memory: 50Mi
+            limits:
+              cpu: "100m"
+              memory: 100Mi
+    asserts:
+      - isSubset:
+          path: spec.jobTemplate.spec.template.spec.initContainers[0]
+          content:
+            args:
+              - ls
+              - -lah
+            command:
+              - bash
+            env: null
+            envFrom: null
+            image: docker.io/path/to/docker/image:v1.0.0
+            imagePullPolicy: IfNotPresent
+            resources:
+              requests:
+                cpu: "30m"
+                memory: 50Mi
+              limits:
+                cpu: "100m"
+                memory: 100Mi
 
-#  - it: test initContainers
-#    set:
-##      initContainers[0].name: 'fooBarBaz'
-##      initContainers[0].image: 'docker.io/test-image:latest'
-##      initContainers[0].command: "ls"
-##      initContainers[0].args: 'ls'
-#
-#
-##      initApplication[0].name: foo
-##      initApplication[0].command: 'ls'
-##      initApplication[0].args: 'ls'
-#    asserts:
-#      - contains:
-#          path: spec.jobTemplate.spec.template.spec.initContainers[0]
-#          content:
-#            name: 'foo'
+  - it: test extraEnvVars
+    set:
+      initApplication:
+        - name: initApplicationItem
+
+      extraEnvVars:
+        APP_FOO: bar
+    asserts:
+      - isSubset:
+          path: spec.jobTemplate.spec.template.spec.initContainers[0]
+          content:
+            env:
+              - name: APP_FOO
+                value: bar
+      - isSubset:
+          path: spec.jobTemplate.spec.template.spec.containers[0]
+          content:
+            env:
+              - name: APP_FOO
+                value: bar
+
+  - it: test resources
+    set:
+      resources:
+        enabled: true
+        requests:
+            cpu: 300m
+            memory: 300Mi
+        limits:
+            cpu: 200m
+            memory: 1000Mi
+    asserts:
+      - isSubset:
+          path: spec.jobTemplate.spec.template.spec.containers[0]
+          content:
+            resources:
+              requests:
+                cpu: 300m
+                memory: 300Mi
+              limits:
+                cpu: 200m
+                memory: 1000Mi
+
+  - it: test podSecurityContext
+    set:
+      podSecurityContext:
+        enabled: true
+        runAsNonRoot: false
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+    asserts:
+      - isSubset:
+          path: spec.jobTemplate.spec.template.spec
+          content:
+            securityContext:
+              fsGroup: 1000
+              runAsGroup: 1000
+              runAsNonRoot: false
+              runAsUser: 1000
+
+  - it: test containerSecurityContext
+    set:
+      containerSecurityContext:
+        enabled: true
+        runAsUser: 1000
+        runAsNonRoot: true
+        readOnlyRootFilesystem: false
+
+    asserts:
+      - isSubset:
+          path: spec.jobTemplate.spec.template.spec.containers[0]
+          content:
+            securityContext:
+              readOnlyRootFilesystem: false
+              runAsNonRoot: true
+              runAsUser: 1000
+
+  - it: test terminationGracePeriodSeconds
+    set:
+      terminationGracePeriodSeconds: 10
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.terminationGracePeriodSeconds
+          value: 10
+
+  - it: test restartPolicy
+    set:
+      restartPolicy: None
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.restartPolicy
+          value: None
 

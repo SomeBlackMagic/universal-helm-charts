@@ -48,6 +48,9 @@ spec:
             {{- end }}
           annotations:
             imageId: {{ $.Values.image.id | quote }}
+            {{- range $item := $.Values.extraEnvVarsSecrets }}
+            checksum/externalSecret_{{ $item.name }}: {{ $item.checksum | quote  }}
+            {{- end }}
             {{- if $.Values.podAnnotations }}
             {{- include "common.tplvalues.render" (dict "value" $.Values.podAnnotations "context" $) | nindent 12 }}
             {{- end }}
@@ -83,7 +86,7 @@ spec:
             - name: {{ $.Values.job.name }}
               image: "{{ $.Values.image.registry }}/{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
               imagePullPolicy: {{ $.Values.image.pullPolicy }}
-              
+
 
               {{- if $.Values.diagnosticMode.enabled }}
               command: {{- include "common.cmd" (dict "value" $.Values.diagnosticMode.command "context" $) | nindent 16 }}
@@ -101,7 +104,7 @@ spec:
               env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 16 }}
 
               {{- if $.Values.resources.enabled }}
-              resources: {{- omit $.Values.resources "enabled" | toYaml | nindent 14 }}
+              resources: {{- omit $.Values.resources "enabled" | toYaml | nindent 16 }}
               {{- end }}
               {{- if $.Values.containerSecurityContext.enabled }}
               securityContext: {{- omit $.Values.containerSecurityContext "enabled" | toYaml | nindent 16 }}
