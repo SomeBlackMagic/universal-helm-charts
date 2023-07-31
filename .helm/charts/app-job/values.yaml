@@ -90,25 +90,31 @@ containerSecurityContext:
   runAsNonRoot: true
   readOnlyRootFilesystem: false
 
-## @param podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+terminationGracePeriodSeconds: 30
+restartPolicy: OnFailure
+
+## @param podLabels Extra labels for  pods
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 ##
 podLabels: {}
-## @param podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+## @param podAnnotations Annotations for  pods
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 ##
 podAnnotations: {}
 
-## @param sidecars Add additional sidecar containers for the pod(s)
+## @param extraVolumes Optionally specify extra list of additional volumes for the  pod(s)
 ##
-sidecars: []
-
-extraVolumeMounts: []
-
 extraVolumes: []
+## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for the  container(s)
+##
+extraVolumeMounts: []
 
 lifecycle:
   preStop:
     - /bin/sh
     - -c
     - echo "Stopping container by k8s...">/proc/1/fd/1 && /bin/kill -QUIT 1
+
+## @param sidecars Add additional sidecar containers for the pod(s)
+##
+sidecars: []

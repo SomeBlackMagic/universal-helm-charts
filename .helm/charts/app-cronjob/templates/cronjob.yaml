@@ -70,7 +70,7 @@ spec:
               imagePullPolicy: {{ $.Values.image.pullPolicy }}
 
               command: {{- include "common.cmd" (dict "value" $job.command "context" $) | nindent 16 }}
-              args:{{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 16 }}
+              args: {{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 16 }}
 
               envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 16 }}
               env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 16 }}
@@ -114,7 +114,16 @@ spec:
                   exec:
                     command: {{- include "common.cmd" (dict "value" $.Values.lifecycle.preStop "context" $) | nindent 22 }}
 
+              volumeMounts:
+                {{- if $.Values.extraVolumeMounts }}
+                {{- include "common.tplvalues.render" ( dict "value" $.Values.extraVolumeMounts "context" $) | nindent 16 }}
+                {{- end }}
+
             {{- if $.Values.sidecars }}
             {{- include "common.tplvalues.render" (dict "value" $.Values.sidecars "context" $) | nindent 12 }}
             {{- end }}
 
+          volumes:
+            {{- if $.Values.extraVolumes }}
+            {{- include "common.tplvalues.render" ( dict "value" $.Values.extraVolumes "context" $) | nindent 12 }}
+            {{- end }}

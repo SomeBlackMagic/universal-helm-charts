@@ -23,7 +23,6 @@ spec:
   ttlSecondsAfterFinished: {{ $.Values.job.ttlSecondsAfterFinished }}
   completions: {{ $.Values.job.completions }}
   activeDeadlineSeconds: {{ $.Values.job.activeDeadlineSeconds }}
-  ttlSecondsAfterFinished: 100
   template:
     metadata:
       labels:
@@ -36,6 +35,9 @@ spec:
         {{- end }}
       annotations:
         imageId: {{ $.Values.image.id | quote }}
+        {{- range $item := $.Values.extraEnvVarsSecrets }}
+        checksum/externalSecret_{{ $item.name }}: {{ $item.checksum | quote  }}
+        {{- end }}
         {{- if $.Values.podAnnotations }}
         {{- include "common.tplvalues.render" (dict "value" $.Values.podAnnotations "context" $) | nindent 8 }}
         {{- end }}
@@ -47,7 +49,8 @@ spec:
       securityContext: {{- omit $.Values.podSecurityContext "enabled" | toYaml | nindent 12 }}
       {{- end }}
 
-      restartPolicy: OnFailure
+      terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds }}
+      restartPolicy: {{ $.Values.restartPolicy }}
       initContainers:
         {{- range $job := $.Values.initApplication }}
         - name: {{ $job.name }}
@@ -60,7 +63,7 @@ spec:
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
 
           command: {{- include "common.cmd" (dict "value" $job.command "context" $) | nindent 12 }}
-          args:{{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 12 }}
+          args: {{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 12 }}
 
           envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}
           env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 12 }}
@@ -70,7 +73,7 @@ spec:
           {{- end }}
         {{- end }}
         {{- if $.Values.initContainers }}
-        {{- include "common.tplvalues.render" ( dict "value" $.Values.initContainers "context" $) | nindent 10 }}
+        {{- include "common.tplvalues.render" ( dict "value" $.Values.initContainers "context" $) | nindent 8 }}
         {{- end }}
       containers:
         - name: {{ $.Values.job.name }}
@@ -105,14 +108,15 @@ spec:
               exec:
                 command: {{- include "common.cmd" (dict "value" $.Values.lifecycle.preStop "context" $) | nindent 18 }}
 
-          {{- if $.Values.sidecars }}
-          {{- include "common.tplvalues.render" (dict "value" $.Values.sidecars "context" $) | nindent 10 }}
-          {{- end }}
           volumeMounts:
-            {{- if .Values.extraVolumeMounts }}
-            {{- include "common.tplvalues.render" ( dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- if $.Values.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" ( dict "value" $.Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
+
+        {{- if $.Values.sidecars }}
+        {{- include "common.tplvalues.render" (dict "value" $.Values.sidecars "context" $) | nindent 8 }}
+        {{- end }}
       volumes:
-        {{- if .Values.extraVolumes }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.extraVolumes "context" $) | nindent 8 }}
+        {{- if $.Values.extraVolumes }}
+        {{- include "common.tplvalues.render" ( dict "value" $.Values.extraVolumes "context" $) | nindent 8 }}
         {{- end }}

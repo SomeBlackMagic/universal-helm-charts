@@ -20,7 +20,6 @@ metadata:
     reloader.stakater.com/auto: "true"
       {{- end }}
     {{- end }}
-{{/*    {{ $.Release.Name }}-external-secret*/}}
 spec:
   replicas: {{ $.Values.replicas }}
   strategy: {{- toYaml $.Values.updateStrategy | nindent 4 }}
@@ -63,7 +62,7 @@ spec:
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
 
           command: {{- include "common.cmd" (dict "value" $job.command "context" $) | nindent 12 }}
-          args:{{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 12 }}
+          args: {{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 12 }}
 
           envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}
           env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 12 }}

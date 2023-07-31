@@ -62,8 +62,7 @@ extraEnvVarsSecrets: []
 
 initContainers: []
 
-extraEnvVars:
-  COLUMNS: 800
+extraEnvVars: {}
 
 ## @param master.updateStrategy.type Redis&trade; master statefulset strategy type
 ## @skip master.updateStrategy.rollingUpdate
@@ -152,7 +151,7 @@ containerSecurityContext:
   readOnlyRootFilesystem: false
 
 terminationGracePeriodSeconds: 30
-
+restartPolicy: OnFailure
 
 ## @param podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
@@ -172,6 +171,13 @@ lifecycle:
 ## @param sidecars Add additional sidecar containers for the pod(s)
 ##
 sidecars: []
+
+## @param extraVolumes Optionally specify extra list of additional volumes for the  pod(s)
+##
+extraVolumes: []
+## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for the  container(s)
+##
+extraVolumeMounts: []
 
 commonLabels: {}
 
