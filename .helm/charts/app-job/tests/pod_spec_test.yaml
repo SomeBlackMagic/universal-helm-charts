@@ -10,7 +10,7 @@ capabilities:
   majorVersion: 1
   minorVersion: 10
   apiVersions:
-    - br.dev.local/v2
+    - monitoring.coreos.com/v1
 chart:
   version: 1.0.0
   appVersion: 1.0.0

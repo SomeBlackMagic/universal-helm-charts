@@ -30,17 +30,18 @@ extraEnvVarsSecrets: []
 
 initContainers: []
 
+##  - name: initApplicationItem
+##    command: "bash"
+##    args: "ls -lah"
+##    resources:
+##      requests:
+##        cpu: "30m"
+##        memory: 50Mi
+##      limits:
+##        cpu: "100m"
+##        memory: 100Mi
 initApplication: []
-#  - name: initApplicationItem
-#    command: "bash"
-#    args: "ls -lah"
-#    resources:
-#      requests:
-#        cpu: "30m"
-#        memory: 50Mi
-#      limits:
-#        cpu: "100m"
-#        memory: 100Mi
+
 
 extraEnvVars: {}
 
@@ -53,7 +54,7 @@ cron:
   # Forbid: The CronJob does not allow concurrent runs; if it is time for a new job run and the previous job run hasn't finished yet, the CronJob skips the new job run
   # Replace: If it is time for a new job run and the previous job run hasn't finished yet, the CronJob replaces the currently running job run with a new job run
   concurrencyPolicy: Forbid
-#  startingDeadlineSeconds: 180
+  # startingDeadlineSeconds: 180
 
 job:
   id: null
@@ -116,3 +117,7 @@ lifecycle:
     - echo "Stopping container by k8s...">/proc/1/fd/1 && /bin/kill -QUIT 1
 
 sidecars: []
+
+extraVolumeMounts: []
+
+extraVolumes: []

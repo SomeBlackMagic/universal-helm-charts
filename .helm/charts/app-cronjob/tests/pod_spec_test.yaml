@@ -1,8 +1,8 @@
 suite: Pod Spec test
 templates:
-  - templates/deployment.yaml
+  - templates/cronjob.yaml
 release:
-  name: my-deployment
+  name: my-cronjob
   namespace: my-namespace
   revision: 1
   upgrade: true
@@ -24,23 +24,23 @@ tests:
         - name: docker-registry-auth-secret
     asserts:
       - isSubset:
-          path: spec.template.spec
+          path: spec.jobTemplate.spec.template.spec
           any: true
           content:
             imagePullSecrets:
               - name: docker-registry-auth-secret
       - equal:
-          path: spec.template.spec.containers[0].image
+          path: spec.jobTemplate.spec.template.spec.containers[0].image
           value: "docker.io/path/to/docker/image:v1.0.0"
       - equal:
-          path: spec.template.spec.containers[0].imagePullPolicy
+          path: spec.jobTemplate.spec.template.spec.containers[0].imagePullPolicy
           value: "IfNotPresent"
   - it: test diagnosticMode
     set:
       diagnosticMode.enabled: true
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[0]
+          path: spec.jobTemplate.spec.template.spec.containers[0]
           content:
             args:
               - infinity
@@ -59,19 +59,19 @@ tests:
 
     asserts:
       - isSubset:
-          path: spec.template.spec.initContainers[0]
+          path: spec.jobTemplate.spec.template.spec.initContainers[0]
           content:
             envFrom:
               - secretRef:
                   name: extraEnvVarsSecrets-name
       - isSubset:
-          path: spec.template.spec.containers[0]
+          path: spec.jobTemplate.spec.template.spec.containers[0]
           content:
             envFrom:
               - secretRef:
                   name: extraEnvVarsSecrets-name
       - equal:
-          path: spec.template.metadata.annotations["checksum/externalSecret_extraEnvVarsSecrets-name"]
+          path: spec.jobTemplate.spec.template.metadata.annotations["checksum/externalSecret_extraEnvVarsSecrets-name"]
           value: "extraEnvVarsSecrets-checksum"
 
 
@@ -84,7 +84,7 @@ tests:
           args: '-lah'
     asserts:
       - isSubset:
-          path: spec.template.spec.initContainers[0]
+          path: spec.jobTemplate.spec.template.spec.initContainers[0]
           content:
             name: 'fooBarBaz'
             image: 'docker.io/test-image:latest'
@@ -111,7 +111,7 @@ tests:
               memory: 100Mi
     asserts:
       - isSubset:
-          path: spec.template.spec.initContainers[0]
+          path: spec.jobTemplate.spec.template.spec.initContainers[0]
           content:
             args:
               - ls
@@ -139,13 +139,13 @@ tests:
         APP_FOO: bar
     asserts:
       - isSubset:
-          path: spec.template.spec.initContainers[0]
+          path: spec.jobTemplate.spec.template.spec.initContainers[0]
           content:
             env:
               - name: APP_FOO
                 value: bar
       - isSubset:
-          path: spec.template.spec.containers[0]
+          path: spec.jobTemplate.spec.template.spec.containers[0]
           content:
             env:
               - name: APP_FOO
@@ -163,7 +163,7 @@ tests:
             memory: 1000Mi
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[0]
+          path: spec.jobTemplate.spec.template.spec.containers[0]
           content:
             resources:
               requests:
@@ -183,7 +183,7 @@ tests:
         fsGroup: 1000
     asserts:
       - isSubset:
-          path: spec.template.spec
+          path: spec.jobTemplate.spec.template.spec
           content:
             securityContext:
               fsGroup: 1000
@@ -201,7 +201,7 @@ tests:
 
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[0]
+          path: spec.jobTemplate.spec.template.spec.containers[0]
           content:
             securityContext:
               readOnlyRootFilesystem: false
@@ -213,7 +213,7 @@ tests:
       terminationGracePeriodSeconds: 10
     asserts:
       - equal:
-          path: spec.template.spec.terminationGracePeriodSeconds
+          path: spec.jobTemplate.spec.template.spec.terminationGracePeriodSeconds
           value: 10
 
   - it: test restartPolicy
@@ -221,7 +221,7 @@ tests:
       restartPolicy: None
     asserts:
       - equal:
-          path: spec.template.spec.restartPolicy
+          path: spec.jobTemplate.spec.template.spec.restartPolicy
           value: None
 
   - it: test podLabels
@@ -230,8 +230,9 @@ tests:
         app.foo.bar/labels: true
     asserts:
       - equal:
-          path: spec.template.metadata.labels["app.foo.bar/labels"]
+          path: spec.jobTemplate.spec.template.metadata.labels["app.foo.bar/labels"]
           value: true
+
 
   - it: test podAnnotations
     set:
@@ -239,7 +240,7 @@ tests:
         app.foo.bar/annotations: true
     asserts:
       - equal:
-          path: spec.template.metadata.annotations["app.foo.bar/annotations"]
+          path: spec.jobTemplate.spec.template.metadata.annotations["app.foo.bar/annotations"]
           value: true
 
   - it: test lifecycle
@@ -251,7 +252,7 @@ tests:
           - ls
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[0]
+          path: spec.jobTemplate.spec.template.spec.containers[0]
           content:
             lifecycle:
               preStop:
@@ -268,11 +269,10 @@ tests:
           image: "docker.io/test-demo/image: latest"
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[1]
+          path: spec.jobTemplate.spec.template.spec.containers[1]
           content:
             name: foo
             image: 'docker.io/test-demo/image: latest'
-
 
   - it: test extraVolumes
     set:
@@ -282,7 +282,7 @@ tests:
             claimName: ~
     asserts:
       - isSubset:
-          path: spec.template.spec
+          path: spec.jobTemplate.spec.template.spec
           content:
             volumes:
               - name: shared-media-data
@@ -297,7 +297,7 @@ tests:
           readOnly: false
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[0]
+          path: spec.jobTemplate.spec.template.spec.containers[0]
           content:
             volumeMounts:
               - name: testing

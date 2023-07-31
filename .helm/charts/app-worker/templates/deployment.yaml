@@ -101,15 +101,15 @@ spec:
           env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 12 }}
 
           {{- if $.Values.resources.enabled }}
-          resources: {{- omit $.Values.resources "enabled" | toYaml | nindent 12 }}
+          resources: {{- omit $.Values.resources "enabled" "active" | toYaml | nindent 12 }}
           {{- end }}
 
-          {{- if $.Values.containerSecurityContext.enabled }}
-          securityContext: {{- omit $.Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- if and (eq $.Values.containerSecurityContext.enabled true) (eq $.Values.containerSecurityContext.active true) }}
+          securityContext: {{- omit $.Values.containerSecurityContext "enabled" "active" | toYaml | nindent 12 }}
           {{- end }}
 
           {{- if and (eq $.Values.readinessProbe.enabled true) (eq $.Values.diagnosticMode.enabled false) }}
-          readinessProbe: {{- omit $.Values.readinessProbe "enabled" | toYaml | nindent 12 }}
+          readinessProbe: {{- omit $.Values.readinessProbe "enabled"  | toYaml | nindent 12 }}
           {{- end }}
 
           {{- if and (eq $.Values.livenessProbe.enabled true) (eq $.Values.diagnosticMode.enabled false) }}

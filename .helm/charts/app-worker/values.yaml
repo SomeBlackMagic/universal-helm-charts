@@ -58,8 +58,7 @@ extraEnvVarsSecrets: []
 
 initContainers: []
 
-extraEnvVars:
-  COLUMNS: 800
+extraEnvVars: {}
 
 ## @param master.updateStrategy.type Redis&trade; master statefulset strategy type
 ## @skip master.updateStrategy.rollingUpdate

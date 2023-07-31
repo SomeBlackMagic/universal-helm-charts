@@ -1,9 +1,7 @@
 suite: Job Spec test
 templates:
-  - templates/job.yaml
+  - templates/cronjob.yaml
 release:
-  name: my-cronjob
-  namespace: my-namespace
   revision: 1
   upgrade: true
 capabilities:
@@ -45,7 +43,7 @@ tests:
         suspend: true
     asserts:
       - isSubset:
-          path: spec
+          path: spec.jobTemplate.spec
           content:
             activeDeadlineSeconds: 850
             backoffLimit: 300
@@ -54,7 +52,7 @@ tests:
             ttlSecondsAfterFinished: 100
 
       - isSubset:
-          path: spec.template.spec.containers[0]
+          path: spec.jobTemplate.spec.template.spec.containers[0]
           content:
             name: "some-name"
             args:
@@ -66,4 +64,4 @@ tests:
 
       - equal:
           path: metadata.name
-          value: my-cronjob-some-id
+          value: RELEASE-NAME-some-id
