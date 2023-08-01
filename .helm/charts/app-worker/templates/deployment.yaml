@@ -53,6 +53,7 @@ spec:
       imagePullSecrets: {{ toYaml $.Values.image.pullSecrets | nindent 8 }}
       {{- end }}
       terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds }}
+      restartPolicy: {{ $.Values.restartPolicy }}
       initContainers:
         {{- range $job := $.Values.initApplication }}
         - name: {{ $job.name }}
@@ -123,10 +124,23 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command: {{- include "common.cmd" (dict "value" $.Values.lifecycle.preStop "context" $) | nindent 18 }}
-          {{- if $.Values.sidecars }}
-          {{- include "common.tplvalues.render" (dict "value" $.Values.sidecars "context" $) | nindent 10 }}
-          {{- end }}
+                command: {{- include "common.cmd" (dict "value" $.Values.lifecycle.preStop "context" $) | nindent 20 }}
+
+
+          volumeMounts:
+            {{- if $.Values.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" ( dict "value" $.Values.extraVolumeMounts "context" $) | nindent 14 }}
+            {{- end }}
+
+        {{- if $.Values.sidecars }}
+        {{- include "common.tplvalues.render" (dict "value" $.Values.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+
+      volumes:
+        {{- if $.Values.extraVolumes }}
+        {{- include "common.tplvalues.render" ( dict "value" $.Values.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:

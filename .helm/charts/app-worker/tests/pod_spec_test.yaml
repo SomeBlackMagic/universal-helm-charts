@@ -2,8 +2,6 @@ suite: Pod Spec test
 templates:
   - templates/deployment.yaml
 release:
-  name: my-deployment
-  namespace: my-namespace
   revision: 1
   upgrade: true
 capabilities:
@@ -163,15 +161,14 @@ tests:
             memory: 1000Mi
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[0]
+          path: spec.template.spec.containers[0].resources
           content:
-            resources:
-              requests:
-                cpu: 300m
-                memory: 300Mi
-              limits:
-                cpu: 200m
-                memory: 1000Mi
+            requests:
+              cpu: 300m
+              memory: 300Mi
+            limits:
+              cpu: 200m
+              memory: 1000Mi
 
   - it: test podSecurityContext
     set:
@@ -183,30 +180,29 @@ tests:
         fsGroup: 1000
     asserts:
       - isSubset:
-          path: spec.template.spec
+          path: spec.template.spec.securityContext
           content:
-            securityContext:
-              fsGroup: 1000
-              runAsGroup: 1000
-              runAsNonRoot: false
-              runAsUser: 1000
+            fsGroup: 1000
+            runAsGroup: 1000
+            runAsNonRoot: false
+            runAsUser: 1000
 
   - it: test containerSecurityContext
     set:
       containerSecurityContext:
         enabled: true
+        active: true
         runAsUser: 1000
         runAsNonRoot: true
         readOnlyRootFilesystem: false
 
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[0]
+          path: spec.template.spec.containers[0].securityContext
           content:
-            securityContext:
-              readOnlyRootFilesystem: false
-              runAsNonRoot: true
-              runAsUser: 1000
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1000
 
   - it: test terminationGracePeriodSeconds
     set:
@@ -282,12 +278,11 @@ tests:
             claimName: ~
     asserts:
       - isSubset:
-          path: spec.template.spec
+          path: spec.template.spec.volumes[0]
           content:
-            volumes:
-              - name: shared-media-data
-                persistentVolumeClaim:
-                  claimName: ~
+               name: shared-media-data
+               persistentVolumeClaim:
+                 claimName: ~
 
   - it: test extraVolumeMounts
     set:
@@ -297,9 +292,8 @@ tests:
           readOnly: false
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[0]
+          path: spec.template.spec.containers[0].volumeMounts[0]
           content:
-            volumeMounts:
-              - name: testing
-                mountPath: /var/lib/testing
-                readOnly: false
+             name: testing
+             mountPath: /var/lib/testing
+             readOnly: false

@@ -45,14 +45,6 @@ spec:
           type: Utilization
           averageUtilization: {{ . }}
     {{- end }}
-    {{- with $.Values.autoscaling.targetMemoryUtilizationPercentage }}
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: {{ . }}
-    {{- end }}
     {{- if $.Values.autoscaling.externalMetric.rabbitmq.enabled }}
     - type: Object
       object:
