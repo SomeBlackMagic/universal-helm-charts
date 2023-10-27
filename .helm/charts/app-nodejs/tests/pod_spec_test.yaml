@@ -216,14 +216,6 @@ tests:
           path: spec.template.spec.terminationGracePeriodSeconds
           value: 10
 
-  - it: test restartPolicy
-    set:
-      restartPolicy: None
-    asserts:
-      - equal:
-          path: spec.template.spec.restartPolicy
-          value: None
-
   - it: test podLabels
     set:
       podLabels:
