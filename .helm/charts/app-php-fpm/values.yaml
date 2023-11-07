@@ -58,9 +58,9 @@ extraEnvVars:
 logsTail:
   enabled: false
   image:
-    registry: docker.io
-    repository: someblackmagic/logs-tail
-    tag: 0.1.0
+    registry: ghcr.io
+    repository: someblackmagic/logs-tailer
+    tag: v0.2.1
   logsFolder: ~
   logsOwnerUser: 1000
   logsOwnerGroup: 1000
@@ -95,14 +95,14 @@ resources:
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   requests: {}
-  # requests:
-  #   cpu: 50m
-  #   memory: 120Mi
+  #requests:
+  #  cpu: 50m
+  #  memory: 120Mi
 
   limits: {}
-  # limits:
-  #   cpu: 300m
-  #   memory: 400Mi
+  #limits:
+  #  cpu: 300m
+  #  memory: 400Mi
 
 livenessProbe:
   enabled: true
@@ -128,10 +128,13 @@ podSecurityContext:
   fsGroup: 1000
 
 containerSecurityContext:
-  active: false  # set in cli args
-  enabled: false  # set in yaml values
+  active: false #set in cli args
+  enabled: false #set in yaml values
   runAsUser: 1000
   runAsNonRoot: true
+  capabilities:
+    add:
+      - SYS_PTRACE
 
 metrics:
   enabled: false
@@ -160,12 +163,12 @@ metrics:
 
 # Mutually exclusive with autoscaling
 autoscaling:
-  active: false  # set in yaml values
-  enabled: false  # set in cli args
+  active: false #set in cli args
+  enabled: false #set in yaml values
   minReplicas: 1
   maxReplicas: 10
-  # targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  #targetCPUUtilizationPercentage: 80
+  #targetMemoryUtilizationPercentage: 80
   behavior: {}
     # scaleDown:
     #   stabilizationWindowSeconds: 300

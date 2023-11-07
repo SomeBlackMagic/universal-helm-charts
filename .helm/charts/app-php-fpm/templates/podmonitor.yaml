@@ -18,7 +18,7 @@ spec:
       - {{ $.Release.Namespace }}
   podMetricsEndpoints:
     - port: monitoring
-      scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ $.Values.metrics.serviceMonitor.scrapeTimeout }}
       interval: {{ $.Values.metrics.serviceMonitor.scrapeInterval }}
 
 {{- end }}

@@ -45,6 +45,7 @@ spec:
       {{- end }}
       terminationGracePeriodSeconds: 30
       shareProcessNamespace: true
+      enableServiceLinks: false
       volumes:
         {{- if $.Values.logsTail.enabled }}
         - name: logs-folder
@@ -137,6 +138,11 @@ spec:
 
           {{- if and (eq $.Values.containerSecurityContext.enabled true) (eq $.Values.containerSecurityContext.active true) }}
           securityContext: {{- omit $.Values.containerSecurityContext "enabled" "active" | toYaml | nindent 12 }}
+          {{- else }}
+          securityContext:
+            capabilities:
+              add:
+                - SYS_PTRACE
           {{- end }}
           volumeMounts:
             {{- if $.Values.logsTail.enabled }}
@@ -234,13 +240,7 @@ spec:
               logDir={{ $.Values.logsTail.logsFolder }}
               mkdir -p ${logDir}
               chown 1000:1000 ${logDir}
-              while true; do
-                ( find "$logDir" -type f -print0 | xargs -0 tail -v -f -n 0 )&
-                tailPid=$!
-                inotifywait --recursive --quiet --event create --format=%w%f "$logDir" | tr \\n \\0 | xargs -0 tail -v
-                kill $tailPid || true
-              done
-
+              /logs-tailer -folder ${logDir}
           resources:
             requests:
               cpu: 15m

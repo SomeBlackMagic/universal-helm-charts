@@ -9,7 +9,7 @@ image:
   id: 1.23-alpine
   digest: ~
   pullPolicy: Always
-  pullSecrets: []
+  pullSecrets: [ ]
 
 
 updateStrategy:
@@ -18,7 +18,7 @@ updateStrategy:
     maxUnavailable: 20%
     maxSurge: 1
 
-replicaCount: 1
+replicas: 1
 
 externalUpstream:
   enabled: false
@@ -28,7 +28,7 @@ externalUpstream:
   failTimeout: 30
 
 extraConfig:
-  enabled: true
+  enabled: false
   content: |
     set_real_ip_from  100.64.64.0/18;
     real_ip_header    X-Forwarded-For;
@@ -40,7 +40,6 @@ extraVhostConfig:
   content: ''
 
 extraEnvVars: {}
-
 extraEnvVarsSecrets: []
 
 containerPorts:
@@ -64,7 +63,7 @@ resources:
 
 livenessProbe:
   enabled: true
-  initialDelaySeconds: 5
+  initialDelaySeconds: 10
   periodSeconds: 10
   timeoutSeconds: 1
   failureThreshold: 3
@@ -72,7 +71,7 @@ livenessProbe:
 
 readinessProbe:
   enabled: true
-  initialDelaySeconds: 5
+  initialDelaySeconds: 15
   periodSeconds: 5
   timeoutSeconds: 1
   failureThreshold: 10
@@ -87,8 +86,7 @@ startupProbe:
   successThreshold: 1
 
 podSecurityContext:
-  active: false  # set in yaml values
-  enabled: false  # set in cli args
+  enabled: false
   fsGroup: 101
   runAsGroup: 101
   runAsUser: 101
@@ -96,8 +94,8 @@ podSecurityContext:
 
 
 containerSecurityContext:
-  active: true  # set in yaml values
-  enabled: true  # set in cli args
+  active: false #set in yaml values
+  enabled: false #set in cli args
   allowPrivilegeEscalation: true
   capabilities:
     add:
@@ -109,6 +107,7 @@ containerSecurityContext:
       - ALL
   procMount: Default
   runAsUser: 101
+
 
 
 ## Configure the ingress resource that allows you to access the
@@ -202,12 +201,12 @@ ingress:
 
 # Mutually exclusive with autoscaling
 autoscaling:
-  active: false  # set in cli args
-  enabled: false  # set in yaml values
+  active: false #set in cli args
+  enabled: false #set in yaml values
   minReplicas: 1
   maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
+  #targetCPUUtilizationPercentage: 80
+  #targetMemoryUtilizationPercentage: 80
   behavior: {}
     # scaleDown:
     #   stabilizationWindowSeconds: 300
