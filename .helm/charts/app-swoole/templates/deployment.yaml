@@ -85,7 +85,7 @@ spec:
           {{- end }}
 
           ports:
-            - name: swoole
+            - name: swoole-rpc
               containerPort: 9501
               protocol: TCP
 
