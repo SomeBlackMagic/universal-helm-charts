@@ -174,11 +174,17 @@ tests:
     set:
       podSecurityContext:
         enabled: true
+        active: true
         runAsNonRoot: false
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
     asserts:
+      - isNotSubset:
+          path: spec.template.spec.securityContext
+          content:
+            enabled: true
+            active: true
       - isSubset:
           path: spec.template.spec.securityContext
           content:
@@ -197,6 +203,11 @@ tests:
         readOnlyRootFilesystem: false
 
     asserts:
+      - isNotSubset:
+          path: spec.template.spec.containers[0].securityContext
+          content:
+            enabled: true
+            active: true
       - isSubset:
           path: spec.template.spec.containers[0].securityContext
           content:

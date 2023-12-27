@@ -46,13 +46,14 @@ spec:
         {{- include "common.tplvalues.render" (dict "value" $.Values.podAnnotations "context" $) | nindent 8 }}
         {{- end }}
     spec:
-      {{- if $.Values.podSecurityContext.enabled }}
-      securityContext: {{- omit $.Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- if and (eq $.Values.podSecurityContext.enabled true) (eq $.Values.podSecurityContext.active true) }}
+      securityContext: {{- omit $.Values.podSecurityContext "enabled" "active" | toYaml | nindent 8 }}
       {{- end }}
       {{- if $.Values.image.pullSecrets }}
       imagePullSecrets: {{ toYaml $.Values.image.pullSecrets | nindent 8 }}
       {{- end }}
       terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds }}
+      restartPolicy: {{ $.Values.restartPolicy }}
       initContainers:
         {{- range $job := $.Values.initApplication }}
         - name: {{ $job.name }}

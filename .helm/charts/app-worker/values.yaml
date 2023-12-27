@@ -147,6 +147,7 @@ containerSecurityContext:
   readOnlyRootFilesystem: false
 
 terminationGracePeriodSeconds: 30
+restartPolicy: Always
 
 ## @param podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
