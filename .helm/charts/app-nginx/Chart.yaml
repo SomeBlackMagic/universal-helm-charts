@@ -1,7 +1,7 @@
 apiVersion: v2
 description: nginx
 name: app-nginx
-version: 0.2.0
+version: 0.2.1
 dependencies:
   - name: common
     repository: https://charts.bitnami.com/bitnami
