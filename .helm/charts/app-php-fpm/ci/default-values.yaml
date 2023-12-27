@@ -55,3 +55,15 @@ containerSecurityContext:
 
 autoscaling:
   enabled: true
+
+
+extraConfigMaps:
+  create: true
+  data:
+    private.pem: |-
+      fooooo
+      bnvxm
+      asdfasdf
+      asdf
+      asdf
+      sdfa

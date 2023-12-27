@@ -210,3 +210,12 @@ sidecars: []
 extraVolumeMounts: []
 
 extraVolumes: []
+
+commonAnnotations: {}
+
+commonLabels: {}
+
+extraConfigMaps:
+  create: false
+  mountFolder: /tmp
+  data: {}
