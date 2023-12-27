@@ -33,6 +33,30 @@ data:
 
 ---
 {{- end }}
+{{- if $.Values.extraFilterIp.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Release.Name }}-extra-filter-ip
+data:
+  extraFilterIp.conf: |-
+    error_page 403 /403.html;
+
+    {{- range $item := $.Values.extraFilterIp.allow }}
+    allow {{ $item }};
+    {{- end }}
+    {{- range $item := $.Values.extraFilterIp.deny }}
+    deny {{ $item }};
+    {{- end }}
+    {{ $.Values.extraFilterIp.defaultPermission }} all;
+
+    location /403.html {
+      return 403 '{{ $.Values.extraFilterIp.forbiddenText }}';
+      allow all;
+    }
+
+---
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -49,3 +73,4 @@ data:
       stub_status;
       }
     }
+

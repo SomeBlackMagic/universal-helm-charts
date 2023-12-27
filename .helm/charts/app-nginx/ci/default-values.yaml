@@ -20,3 +20,13 @@ ingress:
   - hosts:
       - extraTls.local
     secretName: extraTls-local-tls
+
+extraFilterIp:
+  enabled: true
+  default_permission: 'deny'
+  allow:
+    - '1.1.1.1'
+    - '2.2.2.2'
+  deny:
+    - '0.0.0.0'
+    - '3.3.3.3'

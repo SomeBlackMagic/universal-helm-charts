@@ -11,7 +11,7 @@ metadata:
     metadata/deployed-by: {{ $.Values.metadata.deployedBy | quote }}
     metadata/pipeline-url: {{ $.Values.metadata.pipelineUrl | quote }}
 spec:
-  replicas: {{ $.Values.replicas }}
+  replicas: {{ $.Values.replicaCount }}
   strategy: {{- toYaml $.Values.updateStrategy | nindent 4 }}
   selector:
     matchLabels:
@@ -78,6 +78,11 @@ spec:
               mountPath: /etc/nginx/extra/extraVhostConfig.conf
               subPath: extraVHostConfig.conf
             {{- end }}
+            {{- if $.Values.extraFilterIp.enabled }}
+            - name: {{ $.Release.Name }}-extra-filter-ip
+              mountPath: /etc/nginx/extra/extraFilterIp.conf
+              subPath: extraFilterIp.conf
+            {{- end }}
 
             {{- if $.Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" $.Values.extraVolumeMounts "context" $) | nindent 12 }}
@@ -113,7 +118,7 @@ spec:
           command:
             - "/usr/bin/nginx-prometheus-exporter"
           args:
-            - "-nginx.scrape-uri=http://localhost:8888/stub_status"
+            - "-nginx.scrape-uri=http://localhost:8080/stub_status"
           resources: {{ toYaml $.Values.metrics.resources | nindent 12 }}
           ports:
             - containerPort: 9113
@@ -147,6 +152,12 @@ spec:
           configMap:
             name: {{ $.Release.Name }}-extra-vhost-config
         {{- end }}
+        {{- if $.Values.extraFilterIp.enabled }}
+        - name: {{ $.Release.Name }}-extra-filter-ip
+          configMap:
+            name: {{ $.Release.Name }}-extra-filter-ip
+        {{- end }}
+
 
         {{- if $.Values.extraVolumes }}
         {{- include "common.tplvalues.render" ( dict "value" $.Values.extraVolumes "context" $) | nindent 8 }}
