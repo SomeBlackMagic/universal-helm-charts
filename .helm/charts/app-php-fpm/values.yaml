@@ -135,6 +135,7 @@ containerSecurityContext:
   capabilities:
     add:
       - SYS_PTRACE
+      - KILL
 
 metrics:
   enabled: false
@@ -219,3 +220,5 @@ extraConfigMaps:
   create: false
   mountFolder: /tmp
   data: {}
+
+terminationGracePeriodSeconds: 30

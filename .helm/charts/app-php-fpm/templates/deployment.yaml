@@ -43,8 +43,7 @@ spec:
       {{- if $.Values.podSecurityContext.enabled }}
       securityContext: {{- omit $.Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-      terminationGracePeriodSeconds: 30
-      shareProcessNamespace: true
+      terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriodSeconds }}
       enableServiceLinks: false
       volumes:
         {{- if $.Values.logsTail.enabled }}
@@ -148,6 +147,7 @@ spec:
             capabilities:
               add:
                 - SYS_PTRACE
+                - KILL
           {{- end }}
           volumeMounts:
             {{- if $.Values.logsTail.enabled }}
@@ -177,6 +177,7 @@ spec:
           ports:
             - containerPort: 9000
               protocol: TCP
+
           {{- if $.Values.readinessProbe.enabled }}
           readinessProbe:
             exec:
@@ -211,7 +212,7 @@ spec:
                 command:
                   - /bin/sh
                   - -c
-                  - echo "Stopping container by k8s...">/proc/1/fd/1 && /bin/kill -QUIT 1
+                  - echo "Stopping container by k8s..."> /proc/self/fd/1 && /bin/kill -QUIT 1
 
         {{- if $.Values.metrics.enabled }}
         - name: monitoring
