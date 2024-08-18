@@ -1,9 +1,9 @@
 dependencies:
 - name: common
   repository: https://charts.bitnami.com/bitnami
-  version: 2.4.0
+  version: 2.22.0
 - name: someblackmagic-common
   repository: https://someblackmagic.github.io/helm-charts
   version: 0.2.1
-digest: sha256:57c98577c08ab53b4e44bbec016f62ddf9c228c84afdf9d277f1fad0d1131265
-generated: "2023-06-13T17:57:11.238496224+03:00"
+digest: sha256:80fe4a6559e0f2ed9705e6c9d1d9652a93ca544113dbd14bda3ab765a7ffb585
+generated: "2024-08-18T10:38:47.065002405+03:00"
