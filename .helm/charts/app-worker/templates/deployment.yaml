@@ -22,7 +22,15 @@ metadata:
     {{- end }}
 spec:
   replicas: {{ $.Values.replicas }}
-  strategy: {{- toYaml $.Values.updateStrategy | nindent 4 }}
+  strategy:
+    {{- if eq $.Values.updateStrategy.type "Recreate" }}
+    type: Recreate
+    {{- else }}
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ $.Values.updateStrategy.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ $.Values.updateStrategy.rollingUpdate.maxSurge }}
+    {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/chart-name: {{ $.Chart.Name }}
@@ -65,7 +73,10 @@ spec:
           command: {{- include "common.cmd" (dict "value" $job.command "context" $) | nindent 12 }}
           args: {{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 12 }}
 
-          envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}
+          envFrom:
+            {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}
+            {{- include "common.externalsecretEnvVarsSecrets" $ | nindent 12 }}
+
           env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 12 }}
 
           {{- if $job.resources }}
@@ -96,8 +107,7 @@ spec:
 
           envFrom:
             {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}
-            {{- include "common.externalsecretEnvVarsSecrets" . | nindent 12 }}
-
+            {{- include "common.externalsecretEnvVarsSecrets" $ | nindent 12 }}
 
           env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 12 }}
 

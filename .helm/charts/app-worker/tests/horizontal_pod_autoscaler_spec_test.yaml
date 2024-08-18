@@ -79,10 +79,10 @@ tests:
         externalMetric:
           rabbitmq:
             enabled: true
-#            vhost: ~
-#            queue: ~
-#            namespace: ~
-#            value: 1
+            vhost: vhost-foo-bar-baz
+            queue: queue-foo-bar-baz
+            namespace: namespace-foo-bar-baz
+            value: 100
     asserts:
       - isSubset:
           path: spec.metrics[0]
@@ -94,12 +94,12 @@ tests:
                 kind: Namespace
                 name: NAMESPACE
               metric:
-                name: NAMESPACE_RELEASE_NAME_messages_waiting_in_queue_name
+                name: NAMESPACE_RELEASE_NAME_messages_waiting_in_queue
               target:
                 type: Value
-                value: 1
+                value: 100
 
-  - it: test PrometheusRule rabbitmq messages_waiting_in_queue_name
+  - it: test PrometheusRule rabbitmq messages_waiting_in_queue
     documentIndex: 0
     set:
       autoscaling:
@@ -114,9 +114,9 @@ tests:
       - isSubset:
           path: spec.groups[0]
           content:
-            name: RELEASE-NAME-queue-size
+            name: NAMESPACE-RELEASE-NAME-hpa-metrics
             rules:
-              - record: NAMESPACE_RELEASE_NAME_messages_waiting_in_queue_name
+              - record: NAMESPACE_RELEASE_NAME_messages_waiting_in_queue
                 expr: rabbitmq_queue_messages{queue="queue-foo-bar-baz", vhost="vhost-foo-bar-baz", namespace="namespace-foo-bar-baz" }
                 labels:
                   namespace: NAMESPACE

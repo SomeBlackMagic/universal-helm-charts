@@ -19,7 +19,7 @@ Create chart name and version as used by the chart label.
 
 
 {{- define "common.externalsecretEnvVarsSecrets" -}}
-  {{- if $.Values.externalSecret.enabled }}
+  {{- if eq $.Values.externalSecret.enabled true }}
 - secretRef:
     name: {{ $.Release.Name }}-external-secret
   {{- end }}

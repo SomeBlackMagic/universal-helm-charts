@@ -1,0 +1,31 @@
+{{- if
+  and
+  (eq $.Values.metrics.enabled true)
+  (eq $.Values.metrics.prometheusRule.enabled true)
+
+}}
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $.Release.Name }}-metric
+  namespace: {{ $.Release.Namespace }}
+spec:
+  groups:
+    - name: {{ $.Release.Namespace }}-{{ $.Release.Name }}-alerts
+      rules:
+      {{- if $.Values.metrics.prometheusRule.alerts.rabbitmqTooManyMassageInQueue }}
+        - alert: RabbitmqTooManyMassageInQueue
+          annotations:
+            summary: Too many massage in queue
+            description: "In queue '{{ tpl .Values.businessLogicVars.rabbitmqQueueName . }}' in vhost '{{ tpl .Values.businessLogicVars.rabbitmqVhost . }}' more than '{{ .Values.metrics.prometheusRule.alerts.rabbitmqTooManyMassageInQueue.triggerValue }}' messages. Please check correct work application."
+          expr: (rabbitmq_queue_messages{queue="{{ tpl .Values.businessLogicVars.rabbitmqQueueName . }}", vhost="{{ tpl .Values.businessLogicVars.rabbitmqVhost . }}", namespace="{{ tpl .Values.metrics.prometheusRule.alerts.rabbitmqTooManyMassageInQueue.namespace . }}" } > {{ .Values.metrics.prometheusRule.alerts.rabbitmqTooManyMassageInQueue.triggerValue }})
+          for: "{{ .Values.metrics.prometheusRule.alerts.rabbitmqTooManyMassageInQueue.triggerTime }}"
+          labels:
+            severity: "{{ .Values.metrics.prometheusRule.alerts.rabbitmqTooManyMassageInQueue.severity }}"
+      {{- end }}
+
+      {{- with $.Values.metrics.prometheusRule.additionalAlerts }}
+      {{ . | nindent 8 }}
+      {{- end }}
+{{- end }}

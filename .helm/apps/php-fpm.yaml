@@ -5,3 +5,7 @@ image:
   repository: someblackmagic/universal-helm-charts
   tag: php8.2-app-latest
   id: php8.2-app-latest
+
+containerSecurityContext:
+  active: true
+  enabled: true

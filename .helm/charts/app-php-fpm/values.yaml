@@ -89,7 +89,7 @@ updateStrategy:
 replicaCount: 1
 
 resources:
-  enabled: true
+  enabled: false
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -211,6 +211,23 @@ sidecars: []
 extraVolumeMounts: []
 
 extraVolumes: []
+
+secretReloader:
+  enabled: false
+  auto: false
+  watchExternalSecrets: false
+
+externalSecret:
+  enabled: false
+  refreshInterval: 30s
+  secretStoreRef:
+    name: ~
+    kind: ClusterSecretStore
+  targetSecretName: ~
+  dataFrom: []
+  data: []
+
+businessLogicVars: {}
 
 commonAnnotations: {}
 

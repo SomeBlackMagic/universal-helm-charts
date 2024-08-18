@@ -2,14 +2,14 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: {{ $.Release.Name }}
+  name: {{ $.Release.Name }}-hpa
   namespace: {{ $.Release.Namespace }}
 spec:
   groups:
-    - name: {{ $.Release.Name }}-queue-size # Define the name of your rule
+    - name: {{ $.Release.Namespace }}-{{ $.Release.Name }}-hpa-metrics
       rules:
-        - record: {{ include "worker.hpa_metric_name" . }}_messages_waiting_in_queue_name # The name of the metrics you want
-          expr: rabbitmq_queue_messages{queue="{{ $.Values.autoscaling.externalMetric.rabbitmq.queue }}", vhost="{{ $.Values.autoscaling.externalMetric.rabbitmq.vhost }}", namespace="{{ $.Values.autoscaling.externalMetric.rabbitmq.namespace }}" } # Query to make to prometheus
+        - record: {{ include "worker.hpa_metric_name" . }}_messages_waiting_in_queue
+          expr: rabbitmq_queue_messages{queue="{{ tpl .Values.autoscaling.externalMetric.rabbitmq.queue $ }}", vhost="{{ tpl .Values.autoscaling.externalMetric.rabbitmq.vhost $ }}", namespace="{{ tpl .Values.autoscaling.externalMetric.rabbitmq.namespace $ }}" }
           labels:
             namespace: {{ $.Release.Namespace }}
 
@@ -17,7 +17,7 @@ spec:
 {{- end }}
 
 {{- if and (eq $.Values.autoscaling.enabled true) (eq $.Values.autoscaling.active true) }}
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ $.Release.Name }}
@@ -49,7 +49,7 @@ spec:
     - type: Object
       object:
         metric:
-          name: {{ include "worker.hpa_metric_name" . }}_messages_waiting_in_queue_name
+          name: {{ include "worker.hpa_metric_name" . }}_messages_waiting_in_queue
         describedObject:
           apiVersion: v1
           kind: Namespace

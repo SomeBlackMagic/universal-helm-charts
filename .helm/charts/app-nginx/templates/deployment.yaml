@@ -20,10 +20,10 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: {{ $.Release.Name }} # duplicate release name only for work helm-assistant
+        app.kubernetes.io/instance: {{ $.Release.Name | trunc 63 | trimSuffix "-" }} # duplicate release name only for work helm-assistant
         app.kubernetes.io/chart-name: {{ $.Chart.Name }}
-        app.kubernetes.io/release-name: {{ $.Release.Name }}
-        app.metadata.io/version: {{ $.Chart.AppVersion | default "nill" | trunc 63 }}
+        app.kubernetes.io/release-name: {{ $.Release.Name | trunc 63 | trimSuffix "-" }}
+        app.metadata.io/version: {{ $.Chart.AppVersion | default "nill" | trunc 63 | trimSuffix "-" }}
         {{- if $.Values.podLabels }}
         {{- include "common.tplvalues.render" (dict "value" $.Values.podLabels "context" $) | nindent 8 }}
         {{- end }}

@@ -10,5 +10,7 @@ pvc:
   storageClassName: ~
   volumePermissions:
     enabled: false
+    #jobId: ~
+    jobIdAutoGenerate: false
     runAsUser: 0
     fsGroup: 0

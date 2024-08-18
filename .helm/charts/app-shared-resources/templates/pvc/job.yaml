@@ -2,7 +2,13 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
+  {{ if $.Values.pvc.volumePermissions.jobId }}
+  name: {{ $.Release.Name }}-{{ $.Values.pvc.volumePermissions.jobId }}
+  {{ else if $.Values.pvc.volumePermissions.jobIdAutoGenerate }}
+  name: {{ $.Release.Name }}-{{ lower (randAlphaNum 5) }}
+  {{ else }}
   name: {{ $.Release.Name }}
+  {{ end }}
   labels:
     helm.sh/chart-name: {{ $.Chart.Name }}
     helm.sh/chart-version: {{ $.Chart.Version }}
@@ -31,7 +37,7 @@ spec:
             claimName: {{ $.Release.Name }}-{{ $.Values.pvc.name }}
       restartPolicy: OnFailure
       containers:
-        - name: {{ $.Release.Name }}-job
+        - name: job-chown-pvc
           image: alpine:3
           command:
             - chown

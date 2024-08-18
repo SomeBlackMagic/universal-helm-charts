@@ -26,10 +26,10 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: {{ $.Release.Name }} # duplicate release name only for work helm-assistant
+        app.kubernetes.io/instance: {{ $.Release.Name | trunc 63 | trimSuffix "-" }} # duplicate release name only for work helm-assistant
         app.kubernetes.io/chart-name: {{ $.Chart.Name }}
-        app.kubernetes.io/release-name: {{ $.Release.Name }}
-        app.metadata.io/version: {{ $.Chart.AppVersion | default "nill" }}
+        app.kubernetes.io/release-name: {{ $.Release.Name | trunc 63 | trimSuffix "-" }}
+        app.metadata.io/version: {{ $.Chart.AppVersion | default "nill" | trunc 63 | trimSuffix "-" }}
         {{- if $.Values.podLabels }}
         {{- include "common.tplvalues.render" (dict "value" $.Values.podLabels "context" $) | nindent 8 }}
         {{- end }}
@@ -64,8 +64,9 @@ spec:
 
           command: {{- include "common.cmd" (dict "value" $job.command "context" $) | nindent 12 }}
           args: {{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 12 }}
-
-          envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}
+          envFrom:
+            {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}
+            {{- include "common.externalsecretEnvVarsSecrets" $ | nindent 12 }}
           env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 12 }}
 
           {{- if $job.resources }}
@@ -91,8 +92,9 @@ spec:
           {{- else if $.Values.job.arguments }}
           args: {{- include "common.cmd" (dict "value" $.Values.job.arguments "context" $) | nindent 12 }}
           {{- end }}
-
-          envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}
+          envFrom:
+            {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}
+            {{- include "common.externalsecretEnvVarsSecrets" $ | nindent 12 }}
           env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 12 }}
 
           {{- if $.Values.resources.enabled }}
@@ -119,4 +121,11 @@ spec:
       volumes:
         {{- if $.Values.extraVolumes }}
         {{- include "common.tplvalues.render" ( dict "value" $.Values.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+        {{- if $.Values.externalSecrets }}
+        {{- range $secret := $.Values.externalSecrets }}
+        - name: {{ $secret.name }}
+          secret:
+            secretName: {{ $secret.secretName }}
+        {{- end }}
         {{- end }}

@@ -72,7 +72,9 @@ spec:
               command: {{- include "common.cmd" (dict "value" $job.command "context" $) | nindent 16 }}
               args: {{- include "common.cmd" (dict "value" $job.args "context" $) | nindent 16 }}
 
-              envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 16 }}
+              envFrom:
+                {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 16 }}
+                {{- include "common.externalsecretEnvVarsSecrets" $ | nindent 16 }}
               env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 16 }}
 
               {{- if $job.resources }}
@@ -100,7 +102,9 @@ spec:
               args: {{- include "common.cmd" (dict "value" $.Values.job.arguments "context" $) | nindent 16 }}
               {{- end }}
 
-              envFrom: {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 16 }}
+              envFrom:
+                {{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 16 }}
+                {{- include "common.externalsecretEnvVarsSecrets" $ | nindent 16 }}
               env: {{- include "common.containerEnvVars" (dict "value" $.Values.extraEnvVars "context" $) | nindent 16 }}
 
               {{- if $.Values.resources.enabled }}

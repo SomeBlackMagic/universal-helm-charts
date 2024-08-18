@@ -121,3 +121,20 @@ sidecars: []
 extraVolumeMounts: []
 
 extraVolumes: []
+
+secretReloader:
+  enabled: false
+  auto: false
+  watchExternalSecrets: false
+
+externalSecret:
+  enabled: false
+  refreshInterval: 30s
+  secretStoreRef:
+    name: ~
+    kind: ClusterSecretStore
+  targetSecretName: ~
+  dataFrom: []
+  data: []
+
+businessLogicVars: {}
