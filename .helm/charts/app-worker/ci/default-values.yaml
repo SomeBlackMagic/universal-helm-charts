@@ -36,9 +36,13 @@ containerSecurityContext:
   enabled: true
 
 autoscaling:
-  enabled: true
+  enabled: false
 
 externalSecret:
   enabled: true
   secretStoreRef:
     name: vault-backend-global
+
+businessLogicVars:
+  rabbitmqQueueName: 'empty'
+  rabbitmqVhost: 'empty'

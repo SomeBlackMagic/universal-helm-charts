@@ -1,7 +1,7 @@
 apiVersion: v2
 description: worker chart
 name: app-worker
-version: 0.1.7
+version: 0.1.9
 dependencies:
   - name: common
     repository: https://charts.bitnami.com/bitnami

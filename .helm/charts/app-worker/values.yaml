@@ -188,17 +188,19 @@ externalSecret:
   data: []
 
 businessLogicVars:
-  rabbitmqQueueName: ~
-  rabbitmqVhost: ~
+  ENV: ''
+  BRAND_NAME: ''
+  PROJECT_NAME: ''
+  DATACENTER: ''
 
 metrics:
   ## @param metrics.enabled Start a side-car prometheus exporter
   ##
-  enabled: true
+  enabled: false
   prometheusRule:
     ## @param metrics.prometheusRule.enabled Creates a Prometheus Operator prometheusRule (also requires `metrics.enabled` to be `true` and `metrics.prometheusRule.rules`)
     ##
-    enabled: true
+    enabled: false
     ## @param metrics.prometheusRule.namespace Namespace for the prometheusRule Resource (defaults to the Release Namespace)
     ##
     namespace: ""
