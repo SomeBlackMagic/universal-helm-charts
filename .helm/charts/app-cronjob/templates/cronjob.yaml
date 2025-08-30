@@ -49,7 +49,7 @@ spec:
           annotations:
             imageId: {{ $.Values.image.id | quote }}
             {{- range $item := $.Values.extraEnvVarsSecrets }}
-            checksum/externalSecret_{{ $item.name }}: {{ $item.checksum | quote  }}
+            checksum/{{ $item.name }}: {{ $item.checksum | default "empty" | quote  }}
             {{- end }}
             {{- if $.Values.podAnnotations }}
             {{- include "common.tplvalues.render" (dict "value" $.Values.podAnnotations "context" $) | nindent 12 }}

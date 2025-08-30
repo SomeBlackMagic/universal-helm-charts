@@ -5,5 +5,5 @@ dependencies:
 - name: someblackmagic-common
   repository: https://someblackmagic.github.io/helm-charts
   version: 0.2.1
-digest: sha256:5b883e451d95ddbc16164f5bbc25580a115c1cb062e208302ab87ece9350f8e0
-generated: "2023-07-10T12:55:10.091833662+03:00"
+digest: sha256:c95813d7d084200992acc9b5dfa962f96ae1b407f1334cb3463d47e588f2f59d
+generated: "2025-07-10T07:57:34.188587306+03:00"
