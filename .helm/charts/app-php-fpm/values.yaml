@@ -60,7 +60,7 @@ logsTail:
   image:
     registry: ghcr.io
     repository: someblackmagic/logs-tailer
-    tag: v0.2.1
+    tag: v0.3.0
   logsFolder: ~
   logsOwnerUser: 1000
   logsOwnerGroup: 1000
