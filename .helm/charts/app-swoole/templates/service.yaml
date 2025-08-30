@@ -7,6 +7,8 @@ metadata:
     {{- if $.Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" $.Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
+    app.kubernetes.io/chart-name: {{ $.Chart.Name }}
+    app.kubernetes.io/release-name: {{ $.Release.Name }}
   {{- if or $.Values.service.annotations $.Values.commonAnnotations }}
   annotations:
     {{- if $.Values.service.annotations }}
@@ -38,8 +40,8 @@ spec:
   {{- end }}
   ports:
     - name: swoole-rpc
-      port: {{ $.Values.service.ports.swoole }}
-      targetPort: swoole-rpc
+      port: {{ $.Values.service.ports.rpc }}
+      targetPort: {{ $.Values.containerPorts.rpc }}
       protocol: TCP
       {{- if and (or (eq $.Values.service.type "NodePort") (eq $.Values.service.type "LoadBalancer")) (not (empty $.Values.service.nodePorts.swoole)) }}
       nodePort: {{ $.Values.service.nodePorts.swoole }}

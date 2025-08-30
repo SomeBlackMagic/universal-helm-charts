@@ -8,6 +8,9 @@ metadata:
     app.kubernetes.io/name: {{ $.Release.Name }}
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
+
+    app.kubernetes.io/chart-name: {{ $.Chart.Name }}
+    app.kubernetes.io/release-name: {{ $.Release.Name }}
   annotations:
     metadata/deployed-by: {{ $.Values.metadata.deployedBy | quote }}
     metadata/pipeline-url: {{ $.Values.metadata.pipelineUrl | quote }}
@@ -31,7 +34,7 @@ spec:
       annotations:
         imageId: {{ $.Values.image.id | quote }}
         {{- range $item := $.Values.extraEnvVarsSecrets }}
-        checksum/externalSecret_{{ $item.name }}: {{ $item.checksum | quote  }}
+        checksum/{{ $item.name }}: {{ $item.checksum  | default "empty" | quote  }}
         {{- end }}
         {{- if $.Values.podAnnotations }}
         {{- include "common.tplvalues.render" (dict "value" $.Values.podAnnotations "context" $) | nindent 8 }}
@@ -85,8 +88,8 @@ spec:
           {{- end }}
 
           ports:
-            - name: swoole-rpc
-              containerPort: 9501
+            - name: rpc
+              containerPort: {{ $.Values.containerPorts.rpc }}
               protocol: TCP
 
           envFrom:{{- include "common.containerEnvVarsSecrets" (dict "value" $.Values.extraEnvVarsSecrets "context" $) | nindent 12 }}

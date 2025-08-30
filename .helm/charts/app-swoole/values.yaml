@@ -54,6 +54,9 @@ initApplication: []
 ##  - name: secret-name
 ##    checksum: sha256sum-value
 ##
+
+containerPorts:
+  rpc: 9501
 extraEnvVarsSecrets: []
 
 initContainers: []
@@ -185,14 +188,14 @@ service:
   ## @param service.ports.https %%MAIN_CONTAINER_NAME%% service HTTPS port
   ##
   ports:
-    swoole: 80
+    rpc: 80
   ## Node ports to expose
   ## @param service.nodePorts.http Node port for HTTP
   ## @param service.nodePorts.https Node port for HTTPS
   ## NOTE: choose port between <30000-32767>
   ##
   nodePorts:
-    swoole: ""
+    rpc: ""
   ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
   ## e.g.:
   ## clusterIP: None

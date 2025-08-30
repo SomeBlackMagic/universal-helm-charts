@@ -8,6 +8,8 @@ metadata:
     {{- if $.Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" $.Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
+    app.kubernetes.io/chart-name: {{ $.Chart.Name }}
+    app.kubernetes.io/release-name: {{ $.Release.Name }}
   annotations:
     {{- if $.Values.ingress.annotations }}
     {{- include "common.tplvalues.render" (dict "value" $.Values.ingress.annotations "context" $) | nindent 4 }}
@@ -32,6 +34,7 @@ spec:
             pathType: {{ $.Values.ingress.pathType }}
             {{- end }}
             backend: {{- include "common.ingress.backend" (dict "serviceName" $.Release.Name "servicePort" "swoole-rpc" "context" $)  | nindent 14 }}
+
     {{- else if $.Values.ingress.path }}
     - http:
         paths:

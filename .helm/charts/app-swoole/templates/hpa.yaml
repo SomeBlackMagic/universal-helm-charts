@@ -21,6 +21,9 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ $.Release.Name }}
+  labels:
+    app.kubernetes.io/chart-name: {{ $.Chart.Name }}
+    app.kubernetes.io/release-name: {{ $.Release.Name }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
