@@ -30,9 +30,11 @@ externalUpstream:
 extraConfig:
   enabled: false
   content: |
+    set_real_ip_from  127.0.0.0/24;
     set_real_ip_from  100.64.64.0/18;
     real_ip_header    X-Forwarded-For;
     real_ip_recursive on;
+  
 
 extraFilterIp:
   enabled: false
@@ -42,6 +44,9 @@ extraFilterIp:
   deny: []
 
 
+containerPorts:
+  http: 8080
+
 extraVhostConfig:
   enabled: false
   content: ''
@@ -50,8 +55,12 @@ extraEnvVars: {}
 
 extraEnvVarsSecrets: []
 
-containerPorts:
-  http: 8080
+extraVolumeMounts: []
+
+extraVolumes: []
+## @param sidecars Add additional sidecar containers for the pod(s)
+##
+sidecars: []
 
 resources:
   enabled: true
@@ -62,11 +71,11 @@ resources:
   # requests: {}
   # limits: {}
   requests:
+    cpu: 25m
+    memory: 128Mi
+  limits:
     cpu: 100m
     memory: 128Mi
-  # limits:
-  #   cpu: 200m
-  #   memory: 256Mi
 
 
 
@@ -109,6 +118,64 @@ containerSecurityContext:
       - ALL
   procMount: Default
   runAsUser: 101
+
+
+## %%MAIN_CONTAINER_NAME%% service parameters
+##
+service:
+  ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+  ##
+  type: ClusterIP
+  ## @param service.ports.http %%MAIN_CONTAINER_NAME%% service HTTP port
+  ## @param service.ports.https %%MAIN_CONTAINER_NAME%% service HTTPS port
+  ##
+  ports:
+    http: 80
+    https: 443
+  ## Node ports to expose
+  ## @param service.nodePorts.http Node port for HTTP
+  ## @param service.nodePorts.https Node port for HTTPS
+  ## NOTE: choose port between <30000-32767>
+  ##
+  nodePorts:
+    nginx: ""
+  ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+  ## e.g.:
+  ## clusterIP: None
+  ##
+  clusterIP: ""
+  ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+  ##
+  loadBalancerIP: ""
+  ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+  ## e.g:
+  ## loadBalancerSourceRanges:
+  ##   - 10.10.10.0/24
+  ##
+  loadBalancerSourceRanges: []
+  ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+  ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  ##
+  externalTrafficPolicy: Cluster
+  ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+  ##
+  annotations: {}
+  ## @param service.extraPorts Extra ports to expose in %%MAIN_CONTAINER_NAME%% service (normally used with the `sidecars` value)
+  ##
+  extraPorts: []
+  ## @param service.sessionAffinity Control where client requests go, to the same pod or round-robin
+  ## Values: ClientIP or None
+  ## ref: https://kubernetes.io/docs/user-guide/services/
+  ##
+  sessionAffinity: None
+  ## @param service.sessionAffinityConfig Additional settings for the sessionAffinity
+  ## sessionAffinityConfig:
+  ##   clientIP:
+  ##     timeoutSeconds: 300
+  ##
+  sessionAffinityConfig: {}
 
 
 ## Configure the ingress resource that allows you to access the
@@ -238,10 +305,6 @@ podLabels: {}
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 ##
 podAnnotations: {}
-
-extraVolumeMounts: []
-
-extraVolumes: []
 
 metrics:
   enabled: false

@@ -30,3 +30,18 @@ extraFilterIp:
   deny:
     - '0.0.0.0'
     - '3.3.3.3'
+
+
+
+sidecars:
+  - name: waf
+    image: gitlab.oxtech.org:5001/oxgaming/dev/landing-waf/app:master
+    volumeMounts:
+      - name: "{{ $.Release.Name }}-waf-config"
+#        mountPath: /config.yaml
+#        subPath: appConfig.yaml
+
+#extraVolumes:
+#  - name: {{ $.Release.Name }}-waf-config
+#    configMap:
+#      name: {{ $.Release.Name }}-waf-config

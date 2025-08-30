@@ -23,7 +23,7 @@ spec:
         app.kubernetes.io/instance: {{ $.Release.Name | trunc 63 | trimSuffix "-" }} # duplicate release name only for work helm-assistant
         app.kubernetes.io/chart-name: {{ $.Chart.Name }}
         app.kubernetes.io/release-name: {{ $.Release.Name | trunc 63 | trimSuffix "-" }}
-        app.metadata.io/version: {{ $.Chart.AppVersion | default "nill" | trunc 63 | trimSuffix "-" }}
+        app.metadata.io/version: {{ $.Chart.AppVersion | default $.Values.image.tag | trunc 63 | trimSuffix "-" }}
         {{- if $.Values.podLabels }}
         {{- include "common.tplvalues.render" (dict "value" $.Values.podLabels "context" $) | nindent 8 }}
         {{- end }}
@@ -131,6 +131,9 @@ spec:
                   - sh
                   - -c
                   - echo "Stopping container by k8s...">/proc/1/fd/1 && /bin/kill -SIGTERM 1
+        {{- end }}
+        {{- if $.Values.sidecars }}
+        {{- include "common.tplvalues.render" (dict "value" $.Values.sidecars "context" $) | nindent 8 }}
         {{- end }}
       volumes:
         - name: {{ $.Release.Name }}-monitoring-conf

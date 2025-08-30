@@ -1,7 +1,7 @@
 apiVersion: v2
 description: nginx
 name: app-nginx
-version: 0.2.6
+version: 0.3.0
 dependencies:
   - name: common
     repository: https://charts.bitnami.com/bitnami
@@ -14,6 +14,11 @@ dependencies:
     tags:
       - someblackmagic-common
     version: 0.x.x
+
+  - name: magda-common
+    repository: oci://ghcr.io/magda-io/charts
+    version: 1.0.0-alpha.0
+
 maintainers:
   - name: Andrii Cherny
     url: https://github.com/wirwolf
