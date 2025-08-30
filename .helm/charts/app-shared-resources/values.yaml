@@ -14,3 +14,15 @@ pvc:
     jobIdAutoGenerate: false
     runAsUser: 0
     fsGroup: 0
+
+externalSecret:
+  enabled: false
+  refreshInterval: 30s
+  secretStoreRef:
+    name: ~
+    kind: ClusterSecretStore
+  targetSecretName: ~
+  dataFrom: []
+  data: []
+
+businessLogicVars: {}

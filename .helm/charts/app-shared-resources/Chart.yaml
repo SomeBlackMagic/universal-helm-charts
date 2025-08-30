@@ -1,7 +1,7 @@
 apiVersion: v2
 description: app-shared-resources
 name: app-shared-resources
-version: 0.2.0
+version: 0.4.0
 dependencies:
   - name: common
     repository: https://charts.bitnami.com/bitnami
