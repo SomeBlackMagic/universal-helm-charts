@@ -71,7 +71,7 @@ tests:
               - secretRef:
                   name: extraEnvVarsSecrets-name
       - equal:
-          path: spec.template.metadata.annotations["checksum/externalSecret_extraEnvVarsSecrets-name"]
+          path: spec.template.metadata.annotations["checksum/extraEnvVarsSecrets-name"]
           value: "extraEnvVarsSecrets-checksum"
 
 
