@@ -188,10 +188,8 @@ externalSecret:
   data: []
 
 businessLogicVars:
-  ENV: ''
-  BRAND_NAME: ''
-  PROJECT_NAME: ''
-  DATACENTER: ''
+  rabbitmqQueueName: ~
+  rabbitmqVhost: ~
 
 metrics:
   ## @param metrics.enabled Start a side-car prometheus exporter
